@@ -603,7 +603,7 @@ async function fetchAccounts(){
     if(data.accounts?.data){data.accounts.data.forEach(acc=>{accountsData.push({id:acc.id,name:acc.name,type:'facebook',label:'Facebook Page',fans:acc.fan_count,color:'#1877F2',letter:acc.name[0].toUpperCase()});if(acc.instagram_business_account)accountsData.push({id:acc.instagram_business_account.id,name:'@'+(acc.instagram_business_account.username||acc.name),type:'instagram',label:'Instagram Business',fans:acc.instagram_business_account.followers_count,color:'#c2185b',letter:'IG'});});}
     if(!accountsData.length)accountsData.push({id:data.id,name:data.name,type:'user',label:'Conta pessoal',fans:null,color:'#1877F2',letter:(data.name||'U')[0].toUpperCase()});
     const list=document.getElementById('accsList');list.innerHTML='';
-    accountsData.forEach((acc,i)=>{const div=document.createElement('div');div.className='acc-item'+(i===0?' sel':'');div.innerHTML=`<div class="acc-av" style="background:${acc.color}">${acc.letter}</div><div><div style="font-size:13px;font-weight:500">${acc.name}</div><div style="font-size:11px;color:var(--muted)">${acc.label||''}${acc.fans?' · '+fmtN(acc.fans)+' seguidores':''}</div></div><span class="acc-ck">✓</span>`;div.onclick=()=>{accountsData.forEach(a=>a.selected=false);acc.selected=true;document.querySelectorAll('.acc-item').forEach(e=>e.classList.remove('sel'));div.classList.add('sel');};if(i===0)acc.selected=true;list.appendChild(div);});
+    accountsData.forEach((acc,i)=>{const div=document.createElement('div');div.className='acc-item'+(i===0?' sel':'');div.innerHTML=`<div class="acc-av" style="background:${acc.color}">${acc.letter}</div><div><div style="font-size:13px;font-weight:500">${acc.name}</div><div style="font-size:11px;color:'var(--muted)'">${acc.label||''}${acc.fans?' · '+fmtN(acc.fans)+' seguidores':''}</div></div><span class="acc-ck">✓</span>`;div.onclick=()=>{accountsData.forEach(a=>a.selected=false);acc.selected=true;document.querySelectorAll('.acc-item').forEach(e=>e.classList.remove('sel'));div.classList.add('sel');};if(i===0)acc.selected=true;list.appendChild(div);});
     showSt('stS',`Token válido! ${accountsData.length} conta(s).`);
     document.getElementById('accsSection').style.display='block';
     document.getElementById('connBtn').textContent='Analisar conta selecionada';
@@ -739,7 +739,7 @@ function renderOverview(){
     const div=document.createElement('div');div.className='mitem';
     const img=p.media_url||p.thumbnail_url||'';
     const cap=getCap(p).substring(0,100);
-    div.innerHTML=img?`<img src="${img}" loading="lazy" alt="" onerror="this.style.display='none'"><div class="mbadge">${getType(p)}</div><div class="mov"><span>♥${fmtN(getLikes(p))}</span><span>💬${fmtN(getComments(p))}</span></div>${cap?`<div class="mcap">${cap}</div>`:''}`:`<div style="font-size:10px;color:var(--muted);text-align:center;padding:8px;z-index:1">${cap.substring(0,60)||'Post'}</div><div style="position:absolute;bottom:8px;font-size:10px;color:var(--muted)">♥${fmtN(getLikes(p))}</div>`;
+    div.innerHTML=img?`<img src="${img}" loading="lazy" alt="" onerror="this.style.display='none'"><div class="mbadge">${getType(p)}</div><div class="mov"><span>♥${fmtN(getLikes(p))}</span><span>💬${fmtN(getComments(p))}</span></div>${cap?`<div class="mcap">${cap}</div>`:''}`:`<div style="font-size:10px;color:'var(--muted)';text-align:center;padding:8px;z-index:1">${cap.substring(0,60)||'Post'}</div><div style="position:absolute;bottom:8px;font-size:10px;color:'var(--muted)'">♥${fmtN(getLikes(p))}</div>`;
     if(p.permalink)div.onclick=()=>window.open(p.permalink,'_blank');
     grid.appendChild(div);
   });
@@ -768,7 +768,7 @@ function renderPostsTab(){
     const er=_followers?((e/_followers)*100).toFixed(2)+'%':'—';
     const pct=Math.round(e/maxEng*100);
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="max-width:200px"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${cap||'(sem legenda)'}</div>${p.permalink?`<a href="${p.permalink}" target="_blank" style="font-size:10px">ver ↗</a>`:''}</td><td><span class="ptype ${tc}">${type}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px">${fmtN(l)}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px">${fmtN(c)}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--blue)">${fmtN(e)}</span><div class="ebar"><div class="efill" style="width:${pct}%"></div></div></td><td style="font-size:12px;color:var(--green)">${er}</td><td style="font-size:11px;color:var(--muted)">${fmtD(getDate(p),{day:'2-digit',month:'2-digit',year:'2-digit'})}</td>`;
+    tr.innerHTML=`<td style="max-width:200px"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${cap||'(sem legenda)'}</div>${p.permalink?`<a href="${p.permalink}" target="_blank" style="font-size:10px">ver ↗</a>`:''}</td><td><span class="ptype ${tc}">${type}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px">${fmtN(l)}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px">${fmtN(c)}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px;color:'var(--blue)'">${fmtN(e)}</span><div class="ebar"><div class="efill" style="width:${pct}%"></div></div></td><td style="font-size:12px;color:'var(--green)'">${er}</td><td style="font-size:11px;color:'var(--muted)'">${fmtD(getDate(p),{day:'2-digit',month:'2-digit',year:'2-digit'})}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -829,7 +829,7 @@ function renderHashtags(){
   combos.innerHTML=topPosts.map(p=>{
     const tags=getTags(p);
     if(!tags.length)return'';
-    return`<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="badge b-blue">♥ ${fmtN(getLikes(p))}</span><span style="font-size:12px;color:var(--muted)">${getCap(p).substring(0,60)||'(sem legenda)'}</span></div><div style="display:flex;flex-wrap:wrap;gap:5px">${tags.slice(0,10).map((t,i)=>`<span style="font-size:11px;padding:2px 8px;border-radius:12px;background:${colors[i%colors.length]}18;color:${colors[i%colors.length]};border:1px solid ${colors[i%colors.length]}30">${t}</span>`).join('')}</div></div>`;
+    return`<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="badge b-blue">♥ ${fmtN(getLikes(p))}</span><span style="font-size:12px;color:'var(--muted)'">${getCap(p).substring(0,60)||'(sem legenda)'}</span></div><div style="display:flex;flex-wrap:wrap;gap:5px">${tags.slice(0,10).map((t,i)=>`<span style="font-size:11px;padding:2px 8px;border-radius:12px;background:${colors[i%colors.length]}18;color:${colors[i%colors.length]};border:1px solid ${colors[i%colors.length]}30">${t}</span>`).join('')}</div></div>`;
   }).join('')||'<div class="empty">Sem dados suficientes.</div>';
 }
 
@@ -891,13 +891,13 @@ function renderTiming(){
   document.getElementById('timingRec').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
       <div><div class="sec" style="margin-top:0">Melhores dias para postar</div>
-        ${top3days.map((d,i)=>`<div class="cmp-row"><span class="badge ${i===0?'b-blue':i===1?'b-green':'b-orange'}">${i+1}º</span><span style="font-size:13px;font-weight:500;margin-left:8px">${days[d.i]}</span><span style="margin-left:auto;font-size:12px;font-family:'Space Mono',monospace;color:var(--muted)">${fmtN(d.v)} eng médio</span></div>`).join('')}
+        ${top3days.map((d,i)=>`<div class="cmp-row"><span class="badge ${i===0?'b-blue':i===1?'b-green':'b-orange'}">${i+1}º</span><span style="font-size:13px;font-weight:500;margin-left:8px">${days[d.i]}</span><span style="margin-left:auto;font-size:12px;font-family:'Space Mono',monospace;color:'var(--muted)'">${fmtN(d.v)} eng médio</span></div>`).join('')}
       </div>
       <div><div class="sec" style="margin-top:0">Melhores horários para postar</div>
-        ${top3hours.map((h,i)=>`<div class="cmp-row"><span class="badge ${i===0?'b-blue':i===1?'b-green':'b-orange'}">${i+1}º</span><span style="font-size:13px;font-weight:500;margin-left:8px">${h.i}h – ${h.i+1}h</span><span style="margin-left:auto;font-size:12px;font-family:'Space Mono',monospace;color:var(--muted)">${fmtN(h.v)} eng médio</span></div>`).join('')}
+        ${top3hours.map((h,i)=>`<div class="cmp-row"><span class="badge ${i===0?'b-blue':i===1?'b-green':'b-orange'}">${i+1}º</span><span style="font-size:13px;font-weight:500;margin-left:8px">${h.i}h – ${h.i+1}h</span><span style="margin-left:auto;font-size:12px;font-family:'Space Mono',monospace;color:'var(--muted)'">${fmtN(h.v)} eng médio</span></div>`).join('')}
       </div>
     </div>
-    <div style="margin-top:14px;padding:12px;background:var(--green-l);border-radius:var(--rs);font-size:13px;color:var(--teal)">
+    <div style="margin-top:14px;padding:12px;background:'var(--green-l)';border-radius:var(--rs);font-size:13px;color:'var(--teal)'">
       💡 <strong>Recomendação:</strong> Poste às <strong>${days[top3days[0]?.i||0]}s</strong> entre <strong>${top3hours[0]?.i||0}h e ${(top3hours[0]?.i||0)+2}h</strong> para maximizar seu engajamento.
     </div>`;
 }
@@ -935,10 +935,10 @@ function drawCal(){
   calStatSub.textContent=`${months[calMonth]} ${calYear}`;
   calStats.innerHTML=`
     <div class="g2" style="margin-bottom:0">
-      <div style="padding:14px;background:var(--blue-l);border-radius:var(--rs);text-align:center"><div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--blue)">${monthPosts}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">posts publicados</div></div>
-      <div style="padding:14px;background:var(--green-l);border-radius:var(--rs);text-align:center"><div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--teal)">${fmtN(monthEng)}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">engajamentos totais</div></div>
+      <div style="padding:14px;background:'var(--blue-l)';border-radius:var(--rs);text-align:center"><div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:'var(--blue)'">${monthPosts}</div><div style="font-size:11px;color:'var(--muted)';margin-top:3px">posts publicados</div></div>
+      <div style="padding:14px;background:'var(--green-l)';border-radius:var(--rs);text-align:center"><div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:'var(--teal)'">${fmtN(monthEng)}</div><div style="font-size:11px;color:'var(--muted)';margin-top:3px">engajamentos totais</div></div>
     </div>
-    <div style="margin-top:12px;font-size:12px;color:var(--muted)">
+    <div style="margin-top:12px;font-size:12px;color:'var(--muted)'">
       ${monthPosts>0?`Média de ${(monthEng/monthPosts).toFixed(0)} engajamentos por post neste mês.`:'Sem posts neste mês.'}
     </div>`;
   document.getElementById('calDetail').style.display='none';
@@ -946,7 +946,7 @@ function drawCal(){
 
 function showCalDay(posts,day){
   const det=document.getElementById('calDetail');det.style.display='block';
-  document.getElementById('calList').innerHTML=posts.map(p=>`<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="ptype ${getType(p)==='VIDEO'||getType(p)==='REEL'?'pt-r':'pt-i'}">${getType(p)}</span><span style="font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${getCap(p).substring(0,55)||'—'}</span><span style="font-size:12px;font-family:'Space Mono',monospace;color:var(--blue)">♥${fmtN(getLikes(p))}</span>${p.permalink?`<a href="${p.permalink}" target="_blank" style="font-size:11px">↗</a>`:''}</div>`).join('');
+  document.getElementById('calList').innerHTML=posts.map(p=>`<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="ptype ${getType(p)==='VIDEO'||getType(p)==='REEL'?'pt-r':'pt-i'}">${getType(p)}</span><span style="font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${getCap(p).substring(0,55)||'—'}</span><span style="font-size:12px;font-family:'Space Mono',monospace;color:'var(--blue)'">♥${fmtN(getLikes(p))}</span>${p.permalink?`<a href="${p.permalink}" target="_blank" style="font-size:11px">↗</a>`:''}</div>`).join('');
 }
 
 const calPrev=()=>{calMonth--;if(calMonth<0){calMonth=11;calYear--;}drawCal();};
@@ -998,8 +998,8 @@ function renderCompare(){
   const fA=hAvg(first),sA=hAvg(second);
   const diff=sA-fA,pct=fA?Math.round((diff/fA)*100):0;
   document.getElementById('halfComp').innerHTML=`
-    <div style="margin-bottom:12px"><div class="sec" style="margin-top:0">Primeiros ${fmtN(first.length)} posts</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700">${fmtN(fA)}<span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:5px">eng médio</span></div></div>
-    <div style="margin-bottom:12px"><div class="sec">Últimos ${fmtN(second.length)} posts</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700">${fmtN(sA)}<span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:5px">eng médio</span></div></div>
+    <div style="margin-bottom:12px"><div class="sec" style="margin-top:0">Primeiros ${fmtN(first.length)} posts</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700">${fmtN(fA)}<span style="font-size:12px;font-weight:400;color:'var(--muted)';margin-left:5px">eng médio</span></div></div>
+    <div style="margin-bottom:12px"><div class="sec">Últimos ${fmtN(second.length)} posts</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700">${fmtN(sA)}<span style="font-size:12px;font-weight:400;color:'var(--muted)';margin-left:5px">eng médio</span></div></div>
     <div style="padding:10px;border-radius:var(--rs);background:${diff>=0?'var(--green-l)':'var(--red-l)'}">
       <span style="font-size:13px;font-weight:600;color:${diff>=0?'var(--teal)':'var(--red)'}">${diff>=0?'📈':'📉'} ${diff>=0?'+':''}${pct}% de evolução</span>
     </div>`;
@@ -1020,8 +1020,8 @@ function renderCompare(){
   document.getElementById('allTimeBest').innerHTML=top3.map((p,i)=>`
     <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center">
       <div style="font-size:20px">${['🥇','🥈','🥉'][i]}</div>
-      <div style="flex:1"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px">${getCap(p).substring(0,50)||'(sem legenda)'}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">${fmtD(getDate(p),{day:'2-digit',month:'2-digit',year:'numeric'})}</div></div>
-      <div style="text-align:right"><div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--blue)">${fmtN(getLikes(p))}</div><div style="font-size:10px;color:var(--muted)">curtidas</div></div>
+      <div style="flex:1"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px">${getCap(p).substring(0,50)||'(sem legenda)'}</div><div style="font-size:10px;color:'var(--muted)';margin-top:2px">${fmtD(getDate(p),{day:'2-digit',month:'2-digit',year:'numeric'})}</div></div>
+      <div style="text-align:right"><div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:'var(--blue)'">${fmtN(getLikes(p))}</div><div style="font-size:10px;color:'var(--muted)'">curtidas</div></div>
     </div>`).join('');
 }
 
@@ -1051,14 +1051,14 @@ function renderIdeas(){
   const ideas=[
     {icon:'📅',color:'#e3f0fd',badge:'Horário',badgeClass:'b-blue',title:`Poste toda ${days[bestDay.i||0]} entre ${bestHour.i||0}h e ${(bestHour.i||0)+2}h`,text:`Seus dados mostram que posts publicados às ${days[bestDay.i||0]}s no horário das ${bestHour.i||0}h recebem em média ${fmtN(Math.round(bestDay.v||0))} interações — significativamente acima da sua média geral de ${fmtN(avgEng)}.`},
     {icon:'🎬',color:'#f3e5f5',badge:'Formato',badgeClass:'b-purple',title:`Priorize ${bestType?bestType[0]:'vídeo'} — seu formato mais eficaz`,text:`Posts do tipo ${bestType?bestType[0]:'vídeo'} geram em média ${fmtN(Math.round(bestType?bestType[1].s/bestType[1].c:0))} de engajamento na sua conta. Invista mais nesse formato.`},
-    {icon:'#️⃣',color:var(--orange-l),badge:'Hashtags',badgeClass:'b-orange',title:`Use as hashtags ${top3hash.slice(0,2).join(', ')} nos próximos posts`,text:`Essas hashtags têm a maior média de engajamento nos seus posts. Combine pelo menos 2 delas com hashtags menores de nicho para ampliar o alcance orgânico.`},
+    {icon:'#️⃣',color:'#fff8e1',badge:'Hashtags',badgeClass:'b-orange',title:`Use as hashtags ${top3hash.slice(0,2).join(', ')} nos próximos posts`,text:`Essas hashtags têm a maior média de engajamento nos seus posts. Combine pelo menos 2 delas com hashtags menores de nicho para ampliar o alcance orgânico.`},
     {icon:'🔁',color:'var(--green-l)',badge:'Conteúdo',badgeClass:'b-green',title:'Reutilize seu melhor conteúdo em novo formato',text:`Seu post mais engajado teve ${fmtN(getLikes(top3posts[0]))} curtidas. Transforme esse tema em carrossel, Reel ou série de posts para aproveitar o interesse já validado pela sua audiência.`},
     {icon:'💬',color:'#fff8e1',badge:'Engajamento',badgeClass:'b-orange',title:'Termine legendas com perguntas diretas',text:`Posts com perguntas nas legendas recebem até 2x mais comentários. Experimente: "Qual dos dois você prefere?", "Me conta nos comentários 👇" ou "Concorda com isso?"`},
-    {icon:'📊',color:var(--blue-l),badge:'Frequência',badgeClass:'b-blue',title:freq<3?'Aumente sua frequência de posts para 4-5x por semana':`Você está postando ${freq.toFixed(1)}x/semana — mantenha o ritmo!`,text:freq<3?`Sua frequência atual é de ${freq.toFixed(1)} posts por semana. Contas que postam 4-5x/semana têm 67% mais crescimento orgânico. Tente criar conteúdo em lote uma vez por semana para manter a consistência.`:`Sua consistência de ${freq.toFixed(1)} posts por semana é excelente. Foque agora na qualidade e diversidade dos formatos para manter o crescimento.`},
+    {icon:'📊',color:'var(--blue-l)',badge:'Frequência',badgeClass:'b-blue',title:freq<3?'Aumente sua frequência de posts para 4-5x por semana':`Você está postando ${freq.toFixed(1)}x/semana — mantenha o ritmo!`,text:freq<3?`Sua frequência atual é de ${freq.toFixed(1)} posts por semana. Contas que postam 4-5x/semana têm 67% mais crescimento orgânico. Tente criar conteúdo em lote uma vez por semana para manter a consistência.`:`Sua consistência de ${freq.toFixed(1)} posts por semana é excelente. Foque agora na qualidade e diversidade dos formatos para manter o crescimento.`},
     {icon:'🎯',color:'#f3e5f5',badge:'Estratégia',badgeClass:'b-purple',title:'Crie uma série temática semanal',text:`Defina um dia fixo para um tema recorrente (ex: "Segunda da Motivação", "Quinta do Bastidor"). Séries criam expectativa na audiência e aumentam o retorno de seguidores fiéis.`},
-    {icon:'📱',color:var(--green-l),badge:'Reels',badgeClass:'b-green',title:'Transforme seus melhores posts em Reels curtos',text:`Reels de 7-15 segundos com os primeiros 2 segundos impactantes recebem até 3x mais alcance orgânico que posts estáticos. Pegue o tema dos seus posts mais curtidos e adapte em formato de vídeo rápido.`},
+    {icon:'📱',color:'var(--green-l)',badge:'Reels',badgeClass:'b-green',title:'Transforme seus melhores posts em Reels curtos',text:`Reels de 7-15 segundos com os primeiros 2 segundos impactantes recebem até 3x mais alcance orgânico que posts estáticos. Pegue o tema dos seus posts mais curtidos e adapte em formato de vídeo rápido.`},
     {icon:'⏱️',color:'#fff8e1',badge:'Formato',badgeClass:'b-orange',title:'Carrosséis geram mais salvamentos que outros formatos',text:`Posts em carrossel têm taxa de salvamento até 3x maior que imagens simples. Transforme dicas, tutoriais ou listas em carrosséis de 5-10 slides com visual coeso.`},
-    {icon:'🤝',color:var(--blue-l),badge:'Comunidade',badgeClass:'b-blue',title:'Responda comentários nas primeiras 2 horas após postar',text:`O algoritmo do Instagram prioriza posts com alto engajamento inicial. Responder comentários nas primeiras 2 horas após publicar sinaliza atividade ao algoritmo e amplia a distribuição orgânica do post.`},
+    {icon:'🤝',color:'var(--blue-l)',badge:'Comunidade',badgeClass:'b-blue',title:'Responda comentários nas primeiras 2 horas após postar',text:`O algoritmo do Instagram prioriza posts com alto engajamento inicial. Responder comentários nas primeiras 2 horas após publicar sinaliza atividade ao algoritmo e amplia a distribuição orgânica do post.`},
   ];
 
   const container=document.getElementById('ideasContainer');
@@ -1119,17 +1119,17 @@ function renderInsights(){
     {label:'Formatos diferentes',val:typeSet.size,good:typeSet.size>=2},
     {label:'Posts virais (1k+)',val:fmtN(allPosts.filter(p=>getLikes(p)>=1000).length),good:allPosts.filter(p=>getLikes(p)>=1000).length>=1},
   ];
-  document.getElementById('diagList').innerHTML=diag.map(d=>`<div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--muted);flex:1">${d.label}</span><span style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;margin-right:10px">${d.val}</span><span style="font-size:16px">${d.good?'✅':'⚠️'}</span></div>`).join('');
+  document.getElementById('diagList').innerHTML=diag.map(d=>`<div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:'var(--muted)';flex:1">${d.label}</span><span style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;margin-right:10px">${d.val}</span><span style="font-size:16px">${d.good?'✅':'⚠️'}</span></div>`).join('');
 
   // Benchmarks
   document.getElementById('benchmarks').innerHTML=`
-    <div style="margin-bottom:10px;font-size:12px;color:var(--muted)">Comparação com médias do mercado para criadores de conteúdo no Brasil</div>
+    <div style="margin-bottom:10px;font-size:12px;color:'var(--muted)'">Comparação com médias do mercado para criadores de conteúdo no Brasil</div>
     ${[
       {label:'Taxa de engajamento',yours:engRate.toFixed(2)+'%',market:'1-3%',good:engRate>=1},
       {label:'Posts por semana',yours:postsPerWeek.toFixed(1),market:'3-7',good:postsPerWeek>=3},
       {label:'Média curtidas/post',yours:fmtN(Math.round(allPosts.reduce((s,p)=>s+getLikes(p),0)/allPosts.length)),market:'50-500',good:true},
       {label:'Diversidade de formatos',yours:typeSet.size+' tipos',market:'2-4 tipos',good:typeSet.size>=2},
-    ].map(b=>`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;flex:1">${b.label}</span><span style="font-size:12px;font-weight:600;min-width:70px">${b.yours}</span><span style="font-size:11px;color:var(--muted);min-width:80px">Mercado: ${b.market}</span><span>${b.good?'✅':'⚠️'}</span></div>`).join('')}`;
+    ].map(b=>`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;flex:1">${b.label}</span><span style="font-size:12px;font-weight:600;min-width:70px">${b.yours}</span><span style="font-size:11px;color:'var(--muted)';min-width:80px">Mercado: ${b.market}</span><span>${b.good?'✅':'⚠️'}</span></div>`).join('')}`;
 }
 
 function drawGauge(id,score,color){
