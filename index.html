@@ -180,6 +180,12 @@
       <div class="accounts-list" id="accountsList"></div>
     </div>
 
+    <div id="manualSection" style="margin-bottom:16px">
+      <div class="field-label" style="margin-bottom:6px">ID do Instagram (opcional)</div>
+      <input type="text" id="manualIgId" class="proxy-input" placeholder="Ex: 17841402179937362 — deixe vazio para detectar automaticamente" />
+      <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:8px">Se sua conta não aparecer na lista, cole o ID do Instagram aqui. Tipo: <strong>instagram</strong></div>
+    </div>
+
     <button class="btn btn-blue btn-full" id="connectBtn" onclick="handleConnect()">
       Conectar minha conta
     </button>
@@ -326,11 +332,21 @@ async function apiCall(path, params = {}) {
 async function handleConnect() {
   const token = document.getElementById('tokenInput').value.trim();
   const proxy = document.getElementById('proxyInput').value.trim();
+  const manualId = document.getElementById('manualIgId').value.trim();
   if (!token) { showStatus('statusError', 'Cole seu token de acesso.'); return; }
   if (!proxy) { showStatus('statusError', 'Cole a URL do seu Cloudflare Worker.'); return; }
 
   TOKEN = token;
   PROXY = proxy;
+
+  // Se informou ID manual, usa direto
+  if (manualId) {
+    ACCOUNT_ID = manualId;
+    ACCOUNT_TYPE = 'instagram';
+    accountsData = [{ id: manualId, name: '@osvaldoalvesss', type: 'instagram', selected: true }];
+    await loadDashboard();
+    return;
+  }
 
   if (accountsData.length === 0) {
     await fetchAccounts();
