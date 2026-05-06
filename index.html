@@ -3,437 +3,575 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MetaInsights — Análise de Perfil</title>
+<title>MetaInsights Pro — Dashboard Completo</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-:root {
-  --blue:#1877F2;--blue-l:#e3f0fd;--pink:#E91E8C;--purple:#6a1b9a;
-  --bg:#f4f4f0;--card:#fff;--border:rgba(0,0,0,0.07);
+:root{
+  --blue:#1877F2;--blue-l:#e3f0fd;--blue-d:#0C447C;
+  --pink:#E91E8C;--purple:#6a1b9a;--teal:#0F6E56;
+  --bg:#f2f2ee;--card:#fff;--border:rgba(0,0,0,0.07);
   --text:#181818;--muted:#6b6b6b;--hint:#aaa;
   --green:#1D9E75;--green-l:#e1f5ee;
-  --orange:#f57c00;--orange-l:#fff3e0;
+  --orange:#f57c00;--orange-l:#fff8e1;
+  --red:#c62828;--red-l:#ffebee;
   --r:12px;--rs:8px;
+  --shadow:0 2px 12px rgba(0,0,0,0.06);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+a{color:var(--blue);text-decoration:none;}
+a:hover{text-decoration:underline;}
 
 /* LOGIN */
-#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-.lcard{background:var(--card);border-radius:16px;border:1px solid var(--border);padding:36px;max-width:500px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.06);}
-.llogo{display:flex;align-items:center;gap:10px;margin-bottom:24px;}
-.lmark{width:34px;height:34px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;}
-.ltitle{font-size:20px;font-weight:600;margin-bottom:5px;}
-.lsub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
-.flabel{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;}
-.finput{width:100%;font-size:12px;padding:10px 13px;border:1px solid var(--border);border-radius:var(--rs);background:#fafafa;color:var(--text);outline:none;margin-bottom:12px;transition:border .2s;}
-.finput:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,119,242,.1);}
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg);}
+.lcard{background:var(--card);border-radius:20px;border:1px solid var(--border);padding:40px;max-width:500px;width:100%;box-shadow:var(--shadow);}
+.lmark{width:40px;height:40px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.ltitle{font-size:22px;font-weight:600;margin-bottom:6px;}
+.lsub{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.6;}
+.flabel{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;display:block;}
+input[type=text],input[type=password]{width:100%;font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 13px;border:1px solid var(--border);border-radius:var(--rs);background:#fafafa;color:var(--text);outline:none;margin-bottom:12px;transition:border .2s;}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,119,242,.1);}
 .trow{display:flex;gap:7px;margin-bottom:12px;}
-.trow .finput{margin-bottom:0;}
+.trow input{margin-bottom:0;flex:1;}
 .btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:9px 15px;border-radius:var(--rs);border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap;}
 .btn:hover{background:#f0f0ec;}
 .btn-blue{background:var(--blue);color:#fff;border-color:var(--blue);}
 .btn-blue:hover{background:#1566d6;}
 .btn-blue:disabled{opacity:.5;cursor:not-allowed;}
-.btn-full{width:100%;justify-content:center;padding:11px;font-size:14px;}
+.btn-full{width:100%;justify-content:center;padding:12px;font-size:14px;margin-top:4px;}
 .st{padding:10px 13px;border-radius:var(--rs);font-size:12px;display:none;align-items:center;gap:8px;margin-bottom:10px;}
-.st-e{background:#ffebee;color:#c62828;border:1px solid #ffcdd2;}
-.st-l{background:var(--blue-l);color:#0C447C;border:1px solid #b5d4f4;}
-.st-s{background:var(--green-l);color:#0F6E56;border:1px solid #9FE1CB;}
+.st-e{background:var(--red-l);color:var(--red);border:1px solid #ffcdd2;}
+.st-l{background:var(--blue-l);color:var(--blue-d);border:1px solid #b5d4f4;}
+.st-s{background:var(--green-l);color:var(--teal);border:1px solid #9FE1CB;}
 .tip{background:var(--orange-l);border:1px solid #ffcc80;border-radius:var(--rs);padding:10px 13px;font-size:12px;color:#5d4037;margin-bottom:14px;line-height:1.6;}
-.tip a{color:var(--blue);}
-.proxy-box{background:var(--blue-l);border:1px solid #b5d4f4;border-radius:var(--rs);padding:12px 13px;margin-bottom:14px;font-size:12px;color:#0C447C;line-height:1.6;}
-.proxy-box strong{display:block;margin-bottom:3px;font-size:13px;}
-.proxy-box a{color:var(--blue);font-weight:500;}
+.proxy-box{background:var(--blue-l);border:1px solid #b5d4f4;border-radius:var(--rs);padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--blue-d);line-height:1.6;}
 .accs{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;}
 .acc-item{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;transition:all .15s;}
 .acc-item:hover,.acc-item.sel{border-color:var(--blue);background:var(--blue-l);}
 .acc-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
-.acc-n{font-size:13px;font-weight:500;}
-.acc-t{font-size:11px;color:var(--muted);}
-.acc-ck{margin-left:auto;color:var(--blue);font-size:16px;display:none;}
+.acc-ck{margin-left:auto;color:var(--blue);display:none;}
 .acc-item.sel .acc-ck{display:block;}
 
+/* APP SHELL */
+#appShell{display:none;flex-direction:column;min-height:100vh;}
+
 /* TOPBAR */
-#topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 22px;height:52px;display:none;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.tlogo{display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;}
-.tmark{width:26px;height:26px;background:var(--blue);border-radius:5px;display:flex;align-items:center;justify-content:center;}
-.tbadge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;background:var(--green-l);color:#0F6E56;}
+#topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.tlogo{display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-size:14px;font-weight:700;}
+.tmark{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.tbadge{font-size:11px;font-weight:500;padding:4px 11px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;background:var(--green-l);color:var(--teal);}
 .tdot{width:6px;height:6px;border-radius:50%;background:#43a047;}
-.tsel{font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 9px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;}
+select{font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--text);}
 
 /* TABS */
-.tabs{display:flex;gap:2px;background:var(--bg);border-bottom:1px solid var(--border);padding:0 22px;position:sticky;top:52px;z-index:99;}
-.tab{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:12px 16px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.tabs{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;display:flex;overflow-x:auto;position:sticky;top:54px;z-index:199;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:13px 16px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;}
 .tab.active{color:var(--blue);border-bottom-color:var(--blue);}
-.tab:hover{color:var(--text);}
+.tab:hover:not(.active){color:var(--text);}
 
-/* DASHBOARD */
-#dashboard{display:none;}
-.pane{display:none;padding:20px 22px;max-width:1200px;margin:0 auto;}
+/* CONTENT */
+#content{flex:1;}
+.pane{display:none;padding:22px 24px;max-width:1280px;margin:0 auto;}
 .pane.active{display:block;}
 
-/* PROFILE CARD */
-.profile-hdr{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;display:flex;align-items:center;gap:16px;margin-bottom:18px;}
-.p-av{width:52px;height:52px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0;}
-.p-info h2{font-size:15px;font-weight:600;margin-bottom:2px;}
-.p-info p{font-size:12px;color:var(--muted);max-width:360px;line-height:1.4;}
-.p-tags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;}
-.ptag{font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;}
-.ptag-b{background:var(--blue-l);color:var(--blue);}
-.ptag-g{background:#f0f0ec;color:var(--muted);border:1px solid var(--border);}
-.p-stats{margin-left:auto;display:flex;gap:24px;text-align:right;}
-.psv{font-family:'Space Mono',monospace;font-size:19px;font-weight:700;}
-.psl{font-size:11px;color:var(--muted);margin-top:1px;}
-
-/* GRIDS */
-.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px;}
-.g21{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:18px;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;}
-.card-title{font-size:13px;font-weight:600;margin-bottom:3px;}
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);}
+.card-title{font-size:13px;font-weight:600;margin-bottom:3px;color:var(--text);}
 .card-sub{font-size:11px;color:var(--muted);margin-bottom:14px;}
 
-/* KPI */
-.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
-.kpi-l{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;}
-.kpi-v{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;margin-bottom:3px;}
-.kpi-d{font-size:11px;font-weight:500;}
-.d-pos{color:#1D9E75;} .d-neg{color:#c62828;}
+/* PROFILE */
+.profile-hdr{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;display:flex;align-items:center;gap:18px;margin-bottom:20px;box-shadow:var(--shadow);}
+.p-av{width:56px;height:56px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;flex-shrink:0;}
+.p-info h2{font-size:16px;font-weight:600;margin-bottom:3px;}
+.p-info p{font-size:12px;color:var(--muted);max-width:400px;line-height:1.5;}
+.p-tags{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
+.ptag{font-size:11px;font-weight:500;padding:3px 9px;border-radius:4px;}
+.ptag-b{background:var(--blue-l);color:var(--blue);}
+.ptag-g{background:#f0f0ec;color:var(--muted);border:1px solid var(--border);}
+.p-stats{margin-left:auto;display:flex;gap:28px;text-align:right;flex-shrink:0;}
+.psv{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;}
+.psl{font-size:11px;color:var(--muted);margin-top:2px;}
 
-/* POSTS TABLE */
-.ptbl{width:100%;border-collapse:collapse;font-size:12px;}
-.ptbl th{text-align:left;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:0 0 9px;border-bottom:1px solid var(--border);}
-.ptbl td{padding:9px 0;border-bottom:1px solid var(--border);vertical-align:middle;}
-.ptbl tr:last-child td{border-bottom:none;}
-.ptype{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;}
+/* GRIDS */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:20px;}
+.g12{display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:20px;}
+.gmb{margin-bottom:20px;}
+
+/* KPI */
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);}
+.kpi-l{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.kpi-v{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;margin-bottom:4px;}
+.kpi-d{font-size:11px;font-weight:500;}
+.d-pos{color:var(--green);} .d-neg{color:var(--red);}
+.kpi-icon{float:right;font-size:22px;margin-top:-4px;}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl th{text-align:left;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:0 8px 10px 0;border-bottom:1px solid var(--border);}
+.tbl td{padding:10px 8px 10px 0;border-bottom:1px solid var(--border);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#fafafa;}
+.ptype{display:inline-flex;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;}
 .pt-r{background:#f3e5f5;color:#6a1b9a;} .pt-i{background:var(--blue-l);color:#1565c0;}
-.pt-v{background:#fce4ec;color:#c2185b;} .pt-c{background:var(--green-l);color:#0F6E56;}
+.pt-v{background:#fce4ec;color:#c2185b;} .pt-c{background:var(--green-l);color:var(--teal);}
 .ebar{height:3px;background:#f0f0ec;border-radius:2px;margin-top:3px;overflow:hidden;}
 .efill{height:100%;background:var(--blue);border-radius:2px;}
 
 /* MEDIA GRID */
-.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.mitem{border-radius:8px;aspect-ratio:1;cursor:pointer;border:1px solid var(--border);overflow:hidden;position:relative;background:#f0f0ec;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.mitem:hover{border-color:var(--blue);transform:scale(1.02);}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.mitem{border-radius:10px;aspect-ratio:1;cursor:pointer;border:1px solid var(--border);overflow:hidden;position:relative;background:#f0f0ec;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.mitem:hover{border-color:var(--blue);transform:scale(1.02);box-shadow:0 4px 16px rgba(0,0,0,0.12);}
 .mitem img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
-.mov{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);padding:5px 7px;display:flex;gap:7px;font-size:10px;color:#fff;}
-.mbadge{position:absolute;top:5px;right:5px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px;}
-.mcap{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);padding:6px 8px;font-size:10px;color:#fff;line-height:1.3;display:none;}
-.mitem:hover .mcap{display:block;}
+.mov{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:8px 8px 6px;display:flex;gap:8px;font-size:10px;color:#fff;}
+.mbadge{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.65);color:#fff;font-size:9px;font-weight:600;padding:2px 6px;border-radius:3px;}
+.mcap{position:absolute;inset:0;background:rgba(0,0,0,.75);padding:10px;font-size:10px;color:#fff;line-height:1.4;display:none;overflow:hidden;}
+.mitem:hover .mcap{display:flex;flex-direction:column;justify-content:flex-end;}
 
-/* HASHTAGS */
-.hashtag-cloud{display:flex;flex-wrap:wrap;gap:7px;}
-.htag{font-size:12px;font-weight:500;padding:4px 10px;border-radius:20px;cursor:pointer;transition:all .15s;}
-.htag:hover{transform:scale(1.05);}
+/* HASHTAG */
+.hcloud{display:flex;flex-wrap:wrap;gap:7px;}
+.htag{font-size:12px;font-weight:500;padding:4px 11px;border-radius:20px;cursor:pointer;transition:transform .15s;}
+.htag:hover{transform:scale(1.06);}
 
 /* CALENDAR */
+.cal-hdr{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px;}
+.cal-dlbl{font-size:10px;font-weight:600;color:var(--muted);text-align:center;padding:4px 0;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
-.cal-header{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px;}
-.cal-day-lbl{font-size:10px;font-weight:600;color:var(--muted);text-align:center;padding:3px 0;}
-.cal-day{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:var(--muted);cursor:default;position:relative;}
-.cal-day.has-post{background:var(--blue-l);color:var(--blue);font-weight:700;cursor:pointer;}
-.cal-day.has-post:hover{background:var(--blue);color:#fff;}
-.cal-day.today{border:1.5px solid var(--blue);}
-.cal-day.empty{opacity:0;}
+.cday{aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--muted);position:relative;}
+.cday.has{background:var(--blue-l);color:var(--blue);font-weight:700;cursor:pointer;}
+.cday.has:hover{background:var(--blue);color:#fff;}
+.cday.today{border:2px solid var(--blue);}
+.cday .cdot{width:4px;height:4px;border-radius:50%;background:var(--blue);position:absolute;bottom:3px;}
+.cday.has:hover .cdot{background:#fff;}
 
 /* HEATMAP */
-.heat-grid{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;margin-bottom:6px;}
-.heat-cell{height:28px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;}
-.heat-labels{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;}
-.heat-lbl{font-size:9px;color:var(--muted);text-align:center;}
-.day-labels{display:flex;flex-direction:column;gap:2px;margin-right:6px;}
-.day-lbl{height:28px;display:flex;align-items:center;font-size:10px;color:var(--muted);white-space:nowrap;}
+.hmap-wrap{overflow-x:auto;}
+.hmap{display:flex;gap:0;}
+.hmap-days{display:flex;flex-direction:column;gap:2px;padding-top:18px;padding-right:6px;}
+.hmap-dlbl{height:22px;display:flex;align-items:center;font-size:9px;color:var(--muted);white-space:nowrap;}
+.hmap-cols{flex:1;}
+.hmap-hlbls{display:grid;gap:2px;margin-bottom:2px;}
+.hmap-hlbl{font-size:8px;color:var(--muted);text-align:center;}
+.hmap-row{display:grid;gap:2px;margin-bottom:2px;}
+.hmap-cell{height:22px;border-radius:3px;cursor:default;transition:transform .1s;}
+.hmap-cell:hover{transform:scale(1.1);}
 
-/* AUDIENCE BARS */
+/* PROGRESS RING */
+.ring-wrap{position:relative;width:100px;height:100px;margin:0 auto 8px;}
+.ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:19px;font-weight:700;}
+.ring-lbl{text-align:center;font-size:12px;color:var(--muted);}
+
+/* INSIGHT CARDS */
+.insight-card{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);}
+.insight-card:last-child{border-bottom:none;}
+.ic-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.ic-title{font-size:13px;font-weight:600;margin-bottom:3px;}
+.ic-text{font-size:12px;color:var(--muted);line-height:1.5;}
+
+/* IDEAS */
+.idea-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;box-shadow:var(--shadow);}
+.idea-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.idea-title{font-size:13px;font-weight:600;margin-bottom:4px;}
+.idea-text{font-size:12px;color:var(--muted);line-height:1.55;}
+.idea-tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;margin-top:7px;}
+
+/* LEGEND */
+.legend{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+.leg-dot{width:8px;height:8px;border-radius:2px;}
+
+/* AUD BARS */
 .aud-item{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
-.aud-l{font-size:12px;color:var(--muted);width:75px;flex-shrink:0;}
+.aud-l{font-size:12px;color:var(--muted);flex-shrink:0;}
 .aud-bw{flex:1;height:5px;background:#f0f0ec;border-radius:3px;overflow:hidden;}
 .aud-b{height:100%;border-radius:3px;}
-.aud-v{font-size:12px;font-weight:500;width:34px;text-align:right;font-family:'Space Mono',monospace;}
+.aud-v{font-size:12px;font-weight:500;width:36px;text-align:right;font-family:'Space Mono',monospace;}
+
+/* COMPARE */
+.cmp-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px;}
+.cmp-label{width:110px;color:var(--muted);flex-shrink:0;}
+.cmp-bar-wrap{flex:1;height:8px;background:#f0f0ec;border-radius:4px;overflow:hidden;}
+.cmp-bar{height:100%;border-radius:4px;}
+.cmp-val{width:40px;text-align:right;font-family:'Space Mono',monospace;font-size:12px;font-weight:500;}
 
 /* MISC */
 .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
 .spin-b{border-color:rgba(24,119,242,.2);border-top-color:var(--blue);}
 @keyframes spin{to{transform:rotate(360deg);}}
-.lov{position:fixed;inset:0;background:rgba(244,244,240,.92);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:999;}
-.lbig{width:38px;height:38px;border:3px solid rgba(24,119,242,.15);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:14px;}
-.ltxt{font-size:13px;color:var(--muted);}
-.sec-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 7px;}
-.empty-state{text-align:center;padding:28px 0;color:var(--muted);font-size:13px;}
-.legend{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap;}
-.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
-.leg-dot{width:8px;height:8px;border-radius:2px;}
-.score-ring{position:relative;width:90px;height:90px;margin:0 auto 10px;}
-.score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:20px;font-weight:700;}
-.insight-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
-.insight-item:last-child{border-bottom:none;}
-.insight-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-.insight-text{font-size:13px;line-height:1.5;}
-.insight-text strong{font-weight:600;}
+.lov{position:fixed;inset:0;background:rgba(242,242,238,.93);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:999;}
+.lbig{width:42px;height:42px;border:3px solid rgba(24,119,242,.15);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px;}
+.ltxt{font-size:14px;color:var(--muted);}
+.ltxt2{font-size:12px;color:var(--hint);margin-top:4px;}
+.sec{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;}
+.empty{text-align:center;padding:30px;color:var(--muted);font-size:13px;}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;}
+.b-blue{background:var(--blue-l);color:var(--blue);}
+.b-green{background:var(--green-l);color:var(--teal);}
+.b-orange{background:var(--orange-l);color:var(--orange);}
+.b-red{background:var(--red-l);color:var(--red);}
+.b-purple{background:#f3e5f5;color:var(--purple);}
+.divider{height:1px;background:var(--border);margin:14px 0;}
 
 @media(max-width:768px){
-  .g4{grid-template-columns:repeat(2,1fr);}
-  .g21,.g2,.g3{grid-template-columns:1fr;}
+  .g4,.g3{grid-template-columns:repeat(2,1fr);}
+  .g21,.g12,.g2{grid-template-columns:1fr;}
   .mgrid{grid-template-columns:repeat(3,1fr);}
   .p-stats{display:none;}
   .pane{padding:14px;}
-  .tabs{overflow-x:auto;}
 }
 </style>
 </head>
 <body>
-
-<div class="lov" id="lov"><div class="lbig"></div><div class="ltxt" id="ltxt">Carregando...</div></div>
+<div class="lov" id="lov"><div class="lbig"></div><div class="ltxt" id="ltxt">Carregando...</div><div class="ltxt2" id="ltxt2"></div></div>
 
 <!-- LOGIN -->
 <div id="loginScreen">
-  <div class="lcard">
-    <div class="llogo">
-      <div class="lmark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="width:16px;height:16px"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></div>
-      <span style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700">MetaInsights</span>
-    </div>
-    <h1 class="ltitle">Análise de perfil Meta</h1>
-    <p class="lsub">Conecte sua conta do Instagram para ver análises detalhadas de posts, hashtags, melhores horários e muito mais.</p>
-    <div class="proxy-box">
-      <strong>🔗 URL do proxy (Cloudflare Worker)</strong>
-      Exemplo: <code>https://round-block-af15osvaldo-alves077workersdev.osvaldo-alves077.workers.dev</code>
-    </div>
-    <div class="flabel">URL do proxy</div>
-    <input type="text" id="proxyInput" class="finput" placeholder="https://seu-worker.workers.dev" />
-    <div class="tip">Token em <a href="https://developers.facebook.com/tools/explorer/" target="_blank">developers.facebook.com/tools/explorer</a> · Permissões: pages_show_list, instagram_basic, instagram_manage_insights</div>
-    <div class="flabel">Access Token</div>
-    <div class="trow">
-      <input type="password" id="tokenInput" class="finput" placeholder="EAAixNSRmauoB..." autocomplete="off" />
-      <button class="btn" onclick="toggleTok()">👁</button>
-    </div>
-    <div class="flabel">ID do Instagram (se não aparecer na lista)</div>
-    <input type="text" id="manualId" class="finput" placeholder="Ex: 17841402179937362" />
-    <div class="st st-e" id="stE"><span id="stEm"></span></div>
-    <div class="st st-l" id="stL"><div class="spin spin-b"></div><span id="stLm">Validando...</span></div>
-    <div class="st st-s" id="stS"><span id="stSm"></span></div>
-    <div id="accsSection" style="display:none;margin-bottom:14px">
-      <div class="flabel" style="margin-bottom:7px">Selecione a conta</div>
-      <div class="accs" id="accsList"></div>
-    </div>
-    <button class="btn btn-blue btn-full" id="connBtn" onclick="handleConnect()">Conectar minha conta</button>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:5px;height:5px;border-radius:50%;background:#43a047"></div>instagram_basic</div>
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:5px;height:5px;border-radius:50%;background:#43a047"></div>instagram_manage_insights</div>
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:5px;height:5px;border-radius:50%;background:#43a047"></div>pages_show_list</div>
-      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:5px;height:5px;border-radius:50%;background:#43a047"></div>pages_read_engagement</div>
-    </div>
+<div class="lcard">
+  <div class="lmark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="width:20px;height:20px"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></div>
+  <h1 class="ltitle">MetaInsights Pro</h1>
+  <p class="lsub">Dashboard completo para análise do seu perfil Instagram — posts, hashtags, horários, ideias e muito mais.</p>
+  <div class="proxy-box"><strong style="display:block;margin-bottom:3px;font-size:13px">🔗 URL do proxy (Cloudflare Worker)</strong>Cole a URL do seu Worker abaixo. <a href="https://workers.cloudflare.com" target="_blank">Criar gratuitamente →</a></div>
+  <label class="flabel">URL do proxy</label>
+  <input type="text" id="proxyInput" placeholder="https://seu-worker.workers.dev" />
+  <div class="tip">Token em <a href="https://developers.facebook.com/tools/explorer/" target="_blank">developers.facebook.com/tools/explorer</a> com permissões: instagram_basic, instagram_manage_insights, pages_show_list, pages_read_engagement</div>
+  <label class="flabel">Access Token</label>
+  <div class="trow"><input type="password" id="tokenInput" placeholder="EAAixNSR..." autocomplete="off"><button class="btn" onclick="toggleTok()">👁</button></div>
+  <label class="flabel">ID do Instagram (se não aparecer na lista)</label>
+  <input type="text" id="manualId" placeholder="Ex: 17841402179937362" />
+  <div class="st st-e" id="stE"><span id="stEm"></span></div>
+  <div class="st st-l" id="stL"><div class="spin spin-b"></div><span id="stLm">Validando...</span></div>
+  <div class="st st-s" id="stS"><span id="stSm"></span></div>
+  <div id="accsSection" style="display:none;margin-bottom:14px">
+    <label class="flabel" style="margin-bottom:7px">Selecione a conta</label>
+    <div class="accs" id="accsList"></div>
   </div>
+  <button class="btn btn-blue btn-full" id="connBtn" onclick="handleConnect()">Conectar e analisar</button>
+</div>
 </div>
 
-<!-- TOPBAR -->
-<div id="topbar">
-  <div class="tlogo">
-    <div class="tmark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="width:13px;height:13px"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></div>
-    MetaInsights
-  </div>
-  <div style="display:flex;align-items:center;gap:9px">
-    <div class="tbadge"><div class="tdot"></div><span id="tbAcc">Conectado</span></div>
-    <select class="tsel" id="periodSel" onchange="onPeriodChange()">
-      <option value="7">7 dias</option>
-      <option value="28" selected>28 dias</option>
-      <option value="90">90 dias</option>
-    </select>
-    <button class="btn" onclick="logout()" style="font-size:12px;padding:6px 11px">↩ Trocar</button>
-  </div>
-</div>
-
-<!-- TABS -->
-<div class="tabs" id="tabs" style="display:none">
-  <button class="tab active" onclick="switchTab('overview',this)">Visão geral</button>
-  <button class="tab" onclick="switchTab('posts',this)">Publicações</button>
-  <button class="tab" onclick="switchTab('hashtags',this)">Hashtags</button>
-  <button class="tab" onclick="switchTab('timing',this)">Melhores horários</button>
-  <button class="tab" onclick="switchTab('calendar',this)">Calendário</button>
-  <button class="tab" onclick="switchTab('insights',this)">Insights</button>
-</div>
-
-<!-- DASHBOARD -->
-<div id="dashboard">
-
-  <!-- OVERVIEW -->
-  <div class="pane active" id="pane-overview">
-    <div class="profile-hdr">
-      <div class="p-av" id="pAv">?</div>
-      <div class="p-info">
-        <h2 id="pName">—</h2>
-        <p id="pHandle">—</p>
-        <div class="p-tags" id="pTags"></div>
-      </div>
-      <div class="p-stats">
-        <div><div class="psv" id="sFollowers">—</div><div class="psl">seguidores</div></div>
-        <div><div class="psv" id="sPosts">—</div><div class="psl">publicações</div></div>
-        <div><div class="psv" id="sEng">—</div><div class="psl">eng. médio</div></div>
-      </div>
+<!-- APP -->
+<div id="appShell">
+  <div id="topbar">
+    <div class="tlogo">
+      <div class="tmark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="width:15px;height:15px"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></div>
+      MetaInsights Pro
     </div>
-    <div class="g4">
-      <div class="kpi"><div class="kpi-l">Total de curtidas</div><div class="kpi-v" id="kLikes">—</div></div>
-      <div class="kpi"><div class="kpi-l">Total de comentários</div><div class="kpi-v" id="kComments">—</div></div>
-      <div class="kpi"><div class="kpi-l">Melhor post</div><div class="kpi-v" id="kBest">—</div><div style="font-size:10px;color:var(--muted)" id="kBestSub"></div></div>
-      <div class="kpi"><div class="kpi-l">Posts no período</div><div class="kpi-v" id="kPeriodPosts">—</div></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="tbadge"><div class="tdot"></div><span id="tbAcc">—</span></div>
+      <select id="periodSel" onchange="onPeriodChange()">
+        <option value="7">7 dias</option>
+        <option value="28" selected>28 dias</option>
+        <option value="60">60 dias</option>
+        <option value="90">90 dias</option>
+        <option value="180">180 dias</option>
+      </select>
+      <button class="btn" onclick="refreshData()" title="Atualizar dados">↻</button>
+      <button class="btn" onclick="logout()" style="font-size:12px">↩ Trocar</button>
     </div>
-    <div class="g21">
-      <div class="card">
-        <div class="card-title">Engajamento ao longo do tempo</div>
-        <div class="card-sub" id="engSubTitle">Curtidas + comentários por post</div>
-        <div class="legend">
-          <div class="leg-item"><div class="leg-dot" style="background:#1877F2"></div>Curtidas</div>
-          <div class="leg-item"><div class="leg-dot" style="background:#E91E8C;border-style:dashed"></div>Comentários</div>
+  </div>
+  <div class="tabs" id="tabsBar">
+    <button class="tab active" onclick="sw('overview',this)">📊 Visão geral</button>
+    <button class="tab" onclick="sw('posts',this)">📝 Publicações</button>
+    <button class="tab" onclick="sw('hashtags',this)">🏷️ Hashtags</button>
+    <button class="tab" onclick="sw('timing',this)">⏰ Melhores horários</button>
+    <button class="tab" onclick="sw('calendar',this)">📅 Calendário</button>
+    <button class="tab" onclick="sw('compare',this)">📈 Evolução</button>
+    <button class="tab" onclick="sw('ideas',this)">💡 Ideias de conteúdo</button>
+    <button class="tab" onclick="sw('insights',this)">🎯 Insights & score</button>
+  </div>
+  <div id="content">
+
+    <!-- OVERVIEW -->
+    <div class="pane active" id="pane-overview">
+      <div class="profile-hdr">
+        <div class="p-av" id="pAv">?</div>
+        <div class="p-info">
+          <h2 id="pName">—</h2>
+          <p id="pHandle">—</p>
+          <div class="p-tags" id="pTags"></div>
         </div>
-        <div style="position:relative;height:200px"><canvas id="engChart" role="img" aria-label="Engajamento por post ao longo do tempo"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Tipo de conteúdo</div>
-        <div class="card-sub">Distribuição dos seus posts</div>
-        <div style="position:relative;height:150px;margin-bottom:10px"><canvas id="typeChart" role="img" aria-label="Distribuição por tipo de conteúdo"></canvas></div>
-        <div id="typeLegend" style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted)"></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Publicações recentes</div>
-      <div class="card-sub">Passe o mouse para ver a legenda</div>
-      <div class="mgrid" id="mediaGrid"><div class="empty-state">Carregando...</div></div>
-    </div>
-  </div>
-
-  <!-- POSTS -->
-  <div class="pane" id="pane-posts">
-    <div class="card">
-      <div class="card-title">Todas as publicações</div>
-      <div class="card-sub">Ordenadas por engajamento</div>
-      <table class="ptbl">
-        <thead><tr>
-          <th style="width:35%">Post</th>
-          <th>Tipo</th>
-          <th>Curtidas</th>
-          <th>Comentários</th>
-          <th>Eng. total</th>
-          <th>Data</th>
-        </tr></thead>
-        <tbody id="postsBody"><tr><td colspan="6" class="empty-state">Carregando...</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- HASHTAGS -->
-  <div class="pane" id="pane-hashtags">
-    <div class="g2">
-      <div class="card">
-        <div class="card-title">Hashtags mais usadas</div>
-        <div class="card-sub">Frequência de uso nos seus posts</div>
-        <div class="hashtag-cloud" id="hashtagCloud"><div class="empty-state">Carregando...</div></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Hashtags com mais engajamento</div>
-        <div class="card-sub">Média de curtidas por hashtag</div>
-        <div id="hashtagEngList"></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Desempenho por hashtag</div>
-      <div class="card-sub">Top 10 hashtags por engajamento médio</div>
-      <div style="position:relative;height:260px"><canvas id="hashChart" role="img" aria-label="Desempenho por hashtag"></canvas></div>
-    </div>
-  </div>
-
-  <!-- TIMING -->
-  <div class="pane" id="pane-timing">
-    <div class="g3">
-      <div class="card">
-        <div class="card-title">Melhor dia da semana</div>
-        <div class="card-sub">Por engajamento médio</div>
-        <div style="position:relative;height:180px"><canvas id="dayChart" role="img" aria-label="Engajamento por dia da semana"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Melhor horário</div>
-        <div class="card-sub">Por engajamento médio</div>
-        <div style="position:relative;height:180px"><canvas id="hourChart" role="img" aria-label="Engajamento por horário"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Frequência de posts</div>
-        <div class="card-sub">Quantos posts por dia da semana</div>
-        <div style="position:relative;height:180px"><canvas id="freqChart" role="img" aria-label="Frequência de posts por dia"></canvas></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Mapa de calor — engajamento por hora e dia</div>
-      <div class="card-sub">Média de curtidas por horário de publicação</div>
-      <div id="heatmapContainer" style="overflow-x:auto;padding-bottom:8px"></div>
-    </div>
-  </div>
-
-  <!-- CALENDAR -->
-  <div class="pane" id="pane-calendar">
-    <div class="card">
-      <div class="card-title" id="calTitle">Calendário de publicações</div>
-      <div class="card-sub">Dias com publicações destacados em azul</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <button class="btn" onclick="calPrev()">← anterior</button>
-        <span style="font-size:14px;font-weight:600" id="calMonthLabel"></span>
-        <button class="btn" onclick="calNext()">próximo →</button>
-      </div>
-      <div class="cal-header">
-        <div class="cal-day-lbl">Dom</div><div class="cal-day-lbl">Seg</div><div class="cal-day-lbl">Ter</div>
-        <div class="cal-day-lbl">Qua</div><div class="cal-day-lbl">Qui</div><div class="cal-day-lbl">Sex</div><div class="cal-day-lbl">Sáb</div>
-      </div>
-      <div class="cal-grid" id="calGrid"></div>
-      <div id="calPostDetail" style="margin-top:14px;display:none">
-        <div class="sec-title">Posts neste dia</div>
-        <div id="calPostList"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- INSIGHTS -->
-  <div class="pane" id="pane-insights">
-    <div class="g2">
-      <div class="card">
-        <div class="card-title">Score de consistência</div>
-        <div class="card-sub">Baseado na frequência de posts</div>
-        <div class="score-ring">
-          <canvas id="scoreChart" width="90" height="90" role="img" aria-label="Score de consistência"></canvas>
-          <div class="score-num" id="scoreNum">—</div>
+        <div class="p-stats">
+          <div><div class="psv" id="sF">—</div><div class="psl">seguidores</div></div>
+          <div><div class="psv" id="sP">—</div><div class="psl">publicações</div></div>
+          <div><div class="psv" id="sE">—</div><div class="psl">eng. médio</div></div>
+          <div><div class="psv" id="sR">—</div><div class="psl">eng. rate</div></div>
         </div>
-        <div style="text-align:center;font-size:12px;color:var(--muted)" id="scoreLabel"></div>
       </div>
-      <div class="card">
-        <div class="card-title">Taxa de engajamento</div>
-        <div class="card-sub">Média por post vs seguidores</div>
-        <div class="score-ring">
-          <canvas id="engRateChart" width="90" height="90" role="img" aria-label="Taxa de engajamento"></canvas>
-          <div class="score-num" id="engRateNum">—</div>
+      <div class="g4">
+        <div class="kpi"><div class="kpi-l">Total curtidas</div><div class="kpi-icon">❤️</div><div class="kpi-v" id="kL">—</div></div>
+        <div class="kpi"><div class="kpi-l">Total comentários</div><div class="kpi-icon">💬</div><div class="kpi-v" id="kC">—</div></div>
+        <div class="kpi"><div class="kpi-l">Posts no período</div><div class="kpi-icon">📸</div><div class="kpi-v" id="kPP">—</div></div>
+        <div class="kpi"><div class="kpi-l">Melhor post</div><div class="kpi-icon">🏆</div><div class="kpi-v" id="kB">—</div><div style="font-size:10px;color:var(--muted)" id="kBs"></div></div>
+      </div>
+      <div class="g4" style="margin-bottom:20px">
+        <div class="kpi"><div class="kpi-l">Média curtidas/post</div><div class="kpi-v" id="kAL">—</div></div>
+        <div class="kpi"><div class="kpi-l">Média comentários/post</div><div class="kpi-v" id="kAC">—</div></div>
+        <div class="kpi"><div class="kpi-l">Posts com 1k+ curtidas</div><div class="kpi-v" id="kV">—</div></div>
+        <div class="kpi"><div class="kpi-l">Frequência semanal</div><div class="kpi-v" id="kFq">—</div><div style="font-size:10px;color:var(--muted)">posts/semana</div></div>
+      </div>
+      <div class="g21">
+        <div class="card">
+          <div class="card-title">Engajamento por post (Top 30)</div>
+          <div class="card-sub">Curtidas e comentários — passe o mouse para detalhes</div>
+          <div class="legend"><div class="leg"><div class="leg-dot" style="background:#1877F2"></div>Curtidas</div><div class="leg"><div class="leg-dot" style="background:#E91E8C"></div>Comentários</div></div>
+          <div style="position:relative;height:210px"><canvas id="engC" role="img" aria-label="Engajamento por post"></canvas></div>
         </div>
-        <div style="text-align:center;font-size:12px;color:var(--muted)" id="engRateLabel"></div>
+        <div class="card">
+          <div class="card-title">Tipo de conteúdo</div>
+          <div class="card-sub">Distribuição dos posts</div>
+          <div style="position:relative;height:150px;margin-bottom:10px"><canvas id="typeC" role="img" aria-label="Tipos de conteúdo"></canvas></div>
+          <div id="typeLeg" style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted)"></div>
+        </div>
+      </div>
+      <div class="card gmb">
+        <div class="card-title">Publicações recentes</div>
+        <div class="card-sub">Passe o mouse para ver legenda · clique para abrir no Instagram</div>
+        <div class="mgrid" id="mGrid"><div class="empty">Carregando...</div></div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">Recomendações automáticas</div>
-      <div class="card-sub">Baseadas nos dados reais da sua conta</div>
-      <div id="insightsList"></div>
-    </div>
-  </div>
 
-</div>
+    <!-- POSTS -->
+    <div class="pane" id="pane-posts">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div><div class="card-title">Todas as publicações</div><div class="card-sub" style="margin-bottom:0">Ordenadas por engajamento total</div></div>
+          <div style="display:flex;gap:8px">
+            <select id="postFilterType" onchange="renderPostsTab()" style="font-size:11px;padding:4px 8px">
+              <option value="">Todos os tipos</option>
+              <option value="VIDEO">Vídeo</option>
+              <option value="IMAGE">Imagem</option>
+              <option value="CAROUSEL_ALBUM">Carrossel</option>
+            </select>
+            <select id="postSort" onchange="renderPostsTab()" style="font-size:11px;padding:4px 8px">
+              <option value="eng">Por engajamento</option>
+              <option value="likes">Por curtidas</option>
+              <option value="comments">Por comentários</option>
+              <option value="date">Por data</option>
+            </select>
+          </div>
+        </div>
+        <table class="tbl">
+          <thead><tr>
+            <th style="width:36%">Post</th><th>Tipo</th><th>Curtidas</th>
+            <th>Comentários</th><th>Engajamento</th><th>Eng. rate</th><th>Data</th>
+          </tr></thead>
+          <tbody id="postsBody"><tr><td colspan="7" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- HASHTAGS -->
+    <div class="pane" id="pane-hashtags">
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">Nuvem de hashtags</div>
+          <div class="card-sub">Tamanho proporcional ao uso</div>
+          <div class="hcloud" id="hCloud"><div class="empty">Carregando...</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Top hashtags por engajamento</div>
+          <div class="card-sub">Média de curtidas + comentários</div>
+          <div id="hEngList"></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">Desempenho por hashtag</div>
+          <div class="card-sub">Top 12 — engajamento médio</div>
+          <div style="position:relative;height:280px"><canvas id="hBarC" role="img" aria-label="Hashtags por engajamento"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Hashtags mais usadas</div>
+          <div class="card-sub">Frequência de aparição nos posts</div>
+          <div style="position:relative;height:280px"><canvas id="hFreqC" role="img" aria-label="Hashtags por frequência"></canvas></div>
+        </div>
+      </div>
+      <div class="card gmb">
+        <div class="card-title">Combinações de hashtags eficazes</div>
+        <div class="card-sub">Posts com maior engajamento e suas hashtags</div>
+        <div id="hCombos"></div>
+      </div>
+    </div>
+
+    <!-- TIMING -->
+    <div class="pane" id="pane-timing">
+      <div class="g3">
+        <div class="card">
+          <div class="card-title">Melhor dia da semana</div>
+          <div class="card-sub">Engajamento médio por dia</div>
+          <div style="position:relative;height:190px"><canvas id="dayC" role="img" aria-label="Engajamento por dia"></canvas></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:10px;text-align:center" id="bestDayLabel"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Melhor horário</div>
+          <div class="card-sub">Engajamento médio por hora</div>
+          <div style="position:relative;height:190px"><canvas id="hourC" role="img" aria-label="Engajamento por horário"></canvas></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:10px;text-align:center" id="bestHourLabel"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Frequência de posts</div>
+          <div class="card-sub">Quantos posts por dia da semana</div>
+          <div style="position:relative;height:190px"><canvas id="freqC" role="img" aria-label="Frequência por dia"></canvas></div>
+        </div>
+      </div>
+      <div class="card gmb">
+        <div class="card-title">Mapa de calor — hora × dia</div>
+        <div class="card-sub">Engajamento médio por hora e dia da semana (mais escuro = melhor)</div>
+        <div class="hmap-wrap" id="hmapWrap"></div>
+      </div>
+      <div class="card gmb">
+        <div class="card-title">Recomendação de horários</div>
+        <div class="card-sub">Melhores janelas para postar com base nos seus dados</div>
+        <div id="timingRec"></div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="pane" id="pane-calendar">
+      <div class="g2">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div><div class="card-title">Calendário de publicações</div><div class="card-sub" style="margin-bottom:0">Clique em um dia com post para ver detalhes</div></div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <button class="btn" onclick="calPrev()" style="padding:5px 10px">←</button>
+              <span style="font-size:13px;font-weight:600;min-width:130px;text-align:center" id="calLbl"></span>
+              <button class="btn" onclick="calNext()" style="padding:5px 10px">→</button>
+            </div>
+          </div>
+          <div class="cal-hdr">
+            <div class="cal-dlbl">Dom</div><div class="cal-dlbl">Seg</div><div class="cal-dlbl">Ter</div>
+            <div class="cal-dlbl">Qua</div><div class="cal-dlbl">Qui</div><div class="cal-dlbl">Sex</div><div class="cal-dlbl">Sáb</div>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div id="calDetail" style="margin-top:14px;display:none">
+            <div class="sec">Posts neste dia</div>
+            <div id="calList"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Estatísticas do mês</div>
+          <div class="card-sub" id="calStatSub">Resumo do mês atual</div>
+          <div id="calStats"></div>
+        </div>
+      </div>
+      <div class="card gmb">
+        <div class="card-title">Histórico de posts por mês</div>
+        <div class="card-sub">Quantidade de publicações e engajamento total por mês</div>
+        <div style="position:relative;height:220px"><canvas id="monthC" role="img" aria-label="Posts por mês"></canvas></div>
+      </div>
+    </div>
+
+    <!-- COMPARE / EVOLUTION -->
+    <div class="pane" id="pane-compare">
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">Evolução do engajamento</div>
+          <div class="card-sub">Média de engajamento por semana</div>
+          <div style="position:relative;height:220px"><canvas id="evolC" role="img" aria-label="Evolução engajamento"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Crescimento de curtidas</div>
+          <div class="card-sub">Total de curtidas acumulado ao longo do tempo</div>
+          <div style="position:relative;height:220px"><canvas id="likeGrowC" role="img" aria-label="Crescimento curtidas"></canvas></div>
+        </div>
+      </div>
+      <div class="g3">
+        <div class="card">
+          <div class="card-title">Primeiro semestre vs segundo</div>
+          <div class="card-sub">Comparação de performance</div>
+          <div id="halfComp"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Performance por tipo de conteúdo</div>
+          <div class="card-sub">Engajamento médio por formato</div>
+          <div id="typeComp"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Top 3 posts de todos os tempos</div>
+          <div class="card-sub">Maior engajamento já registrado</div>
+          <div id="allTimeBest"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IDEAS -->
+    <div class="pane" id="pane-ideas">
+      <div class="card gmb" style="background:linear-gradient(135deg,#e3f0fd,#e1f5ee);border-color:transparent">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:32px">💡</div>
+          <div>
+            <div style="font-size:15px;font-weight:600;margin-bottom:4px">Ideias geradas com base nos seus dados reais</div>
+            <div style="font-size:13px;color:var(--muted)">Sugestões personalizadas baseadas no seu melhor conteúdo, horários e hashtags</div>
+          </div>
+        </div>
+      </div>
+      <div id="ideasContainer"></div>
+    </div>
+
+    <!-- INSIGHTS & SCORE -->
+    <div class="pane" id="pane-insights">
+      <div class="g3">
+        <div class="card">
+          <div class="card-title">Score de consistência</div>
+          <div class="card-sub">Com base na frequência de posts</div>
+          <div class="ring-wrap"><canvas id="scoreC" width="100" height="100"></canvas><div class="ring-num" id="scoreN">—</div></div>
+          <div class="ring-lbl" id="scoreLbl"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Taxa de engajamento</div>
+          <div class="card-sub">Média por post ÷ seguidores</div>
+          <div class="ring-wrap"><canvas id="erC" width="100" height="100"></canvas><div class="ring-num" id="erN">—</div></div>
+          <div class="ring-lbl" id="erLbl"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Score de diversidade</div>
+          <div class="card-sub">Variedade de formatos usados</div>
+          <div class="ring-wrap"><canvas id="divC" width="100" height="100"></canvas><div class="ring-num" id="divN">—</div></div>
+          <div class="ring-lbl" id="divLbl"></div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">Recomendações prioritárias</div>
+          <div class="card-sub">O que fazer agora para melhorar seus resultados</div>
+          <div id="recList"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Análise detalhada</div>
+          <div class="card-sub">Diagnóstico completo da sua conta</div>
+          <div id="diagList"></div>
+        </div>
+      </div>
+      <div class="card gmb">
+        <div class="card-title">Benchmarks do seu nicho</div>
+        <div class="card-sub">Como você se compara com médias do mercado</div>
+        <div id="benchmarks"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /appShell -->
 
 <script>
 let TOKEN='',PROXY='',ACCOUNT_ID='',ACCOUNT_TYPE='instagram';
 let allPosts=[],accountsData=[];
-let engChartInst=null,typeChartInst=null,hashChartInst=null;
-let dayChartInst=null,hourChartInst=null,freqChartInst=null;
-let scoreChartInst=null,engRateChartInst=null;
+let _followers=0;
 let calMonth=new Date().getMonth(),calYear=new Date().getFullYear();
+let _postDates={};
+// Chart instances
+let charts={};
 
-const fmt=n=>{if(n===undefined||n===null||isNaN(n))return'—';n=parseInt(n);if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString('pt-BR');};
+const fmtN=n=>{if(n===undefined||n===null||isNaN(n))return'—';n=parseInt(n);if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString('pt-BR');};
+const fmtD=(d,opts={day:'2-digit',month:'2-digit'})=>new Date(d).toLocaleDateString('pt-BR',opts);
 const toggleTok=()=>{const i=document.getElementById('tokenInput');i.type=i.type==='password'?'text':'password';};
 const showSt=(id,msg)=>{'stE stL stS'.split(' ').forEach(s=>document.getElementById(s).style.display='none');if(id){document.getElementById(id).style.display='flex';if(msg)document.getElementById(id+'m').textContent=msg;}};
-const setLov=(msg)=>{const o=document.getElementById('lov');if(msg){o.style.display='flex';document.getElementById('ltxt').textContent=msg;}else o.style.display='none';};
-const switchTab=(id,el)=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));document.getElementById('pane-'+id).classList.add('active');};
+const setLov=(msg,sub='')=>{const o=document.getElementById('lov');if(msg){o.style.display='flex';document.getElementById('ltxt').textContent=msg;document.getElementById('ltxt2').textContent=sub;}else o.style.display='none';};
+const sw=(id,el)=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));document.getElementById('pane-'+id).classList.add('active');};
+const killChart=id=>{if(charts[id]){charts[id].destroy();delete charts[id];}};
 
 async function apiCall(path,params={}){
   const p=PROXY.replace(/\/$/,'');
@@ -451,7 +589,7 @@ async function handleConnect(){
   if(!token){showSt('stE','Cole seu token.');return;}
   if(!proxy){showSt('stE','Cole a URL do Worker.');return;}
   TOKEN=token;PROXY=proxy;
-  if(manual){ACCOUNT_ID=manual;ACCOUNT_TYPE='instagram';accountsData=[{id:manual,name:'@osvaldoalvesss',type:'instagram',selected:true}];await loadDashboard();return;}
+  if(manual){ACCOUNT_ID=manual;ACCOUNT_TYPE='instagram';accountsData=[{id:manual,name:'Instagram',type:'instagram',selected:true}];await loadDashboard();return;}
   if(accountsData.length===0){await fetchAccounts();}
   else{const sel=accountsData.find(a=>a.selected);if(!sel){showSt('stE','Selecione uma conta.');return;}ACCOUNT_ID=sel.id;ACCOUNT_TYPE=sel.type;await loadDashboard();}
 }
@@ -462,44 +600,32 @@ async function fetchAccounts(){
   try{
     const data=await apiCall('/v19.0/me',{fields:'id,name,accounts{id,name,category,fan_count,instagram_business_account{id,username,followers_count,media_count}}'});
     accountsData=[];
-    if(data.accounts?.data){
-      data.accounts.data.forEach(acc=>{
-        accountsData.push({id:acc.id,name:acc.name,type:'facebook',label:'Facebook Page',fans:acc.fan_count,color:'#1877F2',letter:acc.name[0].toUpperCase()});
-        if(acc.instagram_business_account)accountsData.push({id:acc.instagram_business_account.id,name:'@'+(acc.instagram_business_account.username||acc.name),type:'instagram',label:'Instagram Business',fans:acc.instagram_business_account.followers_count,color:'#c2185b',letter:'IG'});
-      });
-    }
+    if(data.accounts?.data){data.accounts.data.forEach(acc=>{accountsData.push({id:acc.id,name:acc.name,type:'facebook',label:'Facebook Page',fans:acc.fan_count,color:'#1877F2',letter:acc.name[0].toUpperCase()});if(acc.instagram_business_account)accountsData.push({id:acc.instagram_business_account.id,name:'@'+(acc.instagram_business_account.username||acc.name),type:'instagram',label:'Instagram Business',fans:acc.instagram_business_account.followers_count,color:'#c2185b',letter:'IG'});});}
     if(!accountsData.length)accountsData.push({id:data.id,name:data.name,type:'user',label:'Conta pessoal',fans:null,color:'#1877F2',letter:(data.name||'U')[0].toUpperCase()});
-    renderAccounts();
-    showSt('stS',`Token válido! ${accountsData.length} conta(s) encontrada(s).`);
+    const list=document.getElementById('accsList');list.innerHTML='';
+    accountsData.forEach((acc,i)=>{const div=document.createElement('div');div.className='acc-item'+(i===0?' sel':'');div.innerHTML=`<div class="acc-av" style="background:${acc.color}">${acc.letter}</div><div><div style="font-size:13px;font-weight:500">${acc.name}</div><div style="font-size:11px;color:var(--muted)">${acc.label||''}${acc.fans?' · '+fmtN(acc.fans)+' seguidores':''}</div></div><span class="acc-ck">✓</span>`;div.onclick=()=>{accountsData.forEach(a=>a.selected=false);acc.selected=true;document.querySelectorAll('.acc-item').forEach(e=>e.classList.remove('sel'));div.classList.add('sel');};if(i===0)acc.selected=true;list.appendChild(div);});
+    showSt('stS',`Token válido! ${accountsData.length} conta(s).`);
     document.getElementById('accsSection').style.display='block';
     document.getElementById('connBtn').textContent='Analisar conta selecionada';
-  }catch(e){showSt('stE',e.message||'Erro ao conectar.');}
+  }catch(e){showSt('stE',e.message||'Erro.');}
   document.getElementById('connBtn').disabled=false;
 }
 
-function renderAccounts(){
-  const list=document.getElementById('accsList');list.innerHTML='';
-  accountsData.forEach((acc,i)=>{
-    const div=document.createElement('div');div.className='acc-item'+(i===0?' sel':'');
-    div.innerHTML=`<div class="acc-av" style="background:${acc.color}">${acc.letter}</div><div><div class="acc-n">${acc.name}</div><div class="acc-t">${acc.label}${acc.fans?' · '+fmt(acc.fans)+' seguidores':''}</div></div><span class="acc-ck">✓</span>`;
-    div.onclick=()=>{accountsData.forEach(a=>a.selected=false);acc.selected=true;document.querySelectorAll('.acc-item').forEach(e=>e.classList.remove('sel'));div.classList.add('sel');};
-    if(i===0)acc.selected=true;
-    list.appendChild(div);
-  });
-}
-
 async function loadDashboard(){
-  setLov('Conectando...');
+  setLov('Conectando à sua conta...','Isso pode levar alguns segundos');
   document.getElementById('loginScreen').style.display='none';
-  document.getElementById('topbar').style.display='flex';
-  document.getElementById('tabs').style.display='flex';
-  document.getElementById('dashboard').style.display='block';
+  document.getElementById('appShell').style.display='flex';
   const acc=accountsData.find(a=>a.id===ACCOUNT_ID);
   document.getElementById('tbAcc').textContent=acc?acc.name:'Conectado';
   setLov('Buscando perfil...');await fetchProfile();
-  setLov('Carregando publicações...');await fetchAllMedia();
-  setLov('Analisando dados...');
-  renderOverview();renderPostsTab();renderHashtags();renderTiming();renderCalendar();renderInsights();
+  setLov('Carregando publicações...','Buscando até 200 posts');await fetchAllMedia();
+  setLov('Analisando engajamento...');renderOverview();
+  setLov('Analisando hashtags...');renderHashtags();
+  setLov('Calculando melhores horários...');renderTiming();
+  setLov('Montando calendário...');renderCalendar();
+  setLov('Calculando evolução...');renderCompare();
+  setLov('Gerando ideias de conteúdo...');renderIdeas();
+  setLov('Calculando scores e insights...');renderInsights();
   setLov(null);
 }
 
@@ -507,22 +633,22 @@ async function fetchProfile(){
   try{
     let data;
     if(ACCOUNT_TYPE==='instagram'){
-      data=await apiCall(`/v19.0/${ACCOUNT_ID}`,{fields:'id,username,name,biography,followers_count,media_count,website'});
+      data=await apiCall(`/v19.0/${ACCOUNT_ID}`,{fields:'id,username,name,biography,followers_count,media_count,website,profile_picture_url'});
       document.getElementById('pAv').textContent=(data.username||'IG')[0].toUpperCase();
       document.getElementById('pName').textContent=data.name||('@'+data.username);
-      document.getElementById('pHandle').textContent='@'+data.username+(data.biography?' · '+data.biography.substring(0,80):'');
-      document.getElementById('sFollowers').textContent=fmt(data.followers_count);
-      document.getElementById('sPosts').textContent=fmt(data.media_count);
+      document.getElementById('pHandle').textContent='@'+data.username+(data.biography?' · '+data.biography.substring(0,100):'');
+      document.getElementById('sF').textContent=fmtN(data.followers_count);
+      document.getElementById('sP').textContent=fmtN(data.media_count);
       document.getElementById('pTags').innerHTML='<span class="ptag ptag-b">Instagram Business</span>';
-      window._followers=data.followers_count||0;
+      _followers=data.followers_count||0;
     }else{
       data=await apiCall(`/v19.0/${ACCOUNT_ID}`,{fields:'id,name,category,fan_count'});
       document.getElementById('pAv').textContent=(data.name||'F')[0].toUpperCase();
       document.getElementById('pName').textContent=data.name;
       document.getElementById('pHandle').textContent=data.category||'Página do Facebook';
-      document.getElementById('sFollowers').textContent=fmt(data.fan_count);
-      document.getElementById('pTags').innerHTML='<span class="ptag ptag-b">Facebook Page</span>'+(data.category?`<span class="ptag ptag-g">${data.category}</span>`:'');
-      window._followers=data.fan_count||0;
+      document.getElementById('sF').textContent=fmtN(data.fan_count);
+      document.getElementById('pTags').innerHTML='<span class="ptag ptag-b">Facebook Page</span>';
+      _followers=data.fan_count||0;
     }
   }catch(e){console.error('Profile:',e);}
 }
@@ -530,13 +656,12 @@ async function fetchProfile(){
 async function fetchAllMedia(){
   allPosts=[];
   try{
-    let url,cursor='',limit=50;
     const fields=ACCOUNT_TYPE==='instagram'
       ?'id,caption,media_type,thumbnail_url,media_url,timestamp,like_count,comments_count,permalink'
       :'id,message,story,created_time,attachments{type,media_type},reactions.summary(true),comments.summary(true)';
-    let hasMore=true,page=0;
-    while(hasMore&&page<4){
-      const params={fields,limit};
+    let cursor='',hasMore=true,page=0;
+    while(hasMore&&page<5){
+      const params={fields,limit:50};
       if(cursor)params.after=cursor;
       const ep=ACCOUNT_TYPE==='instagram'?`/v19.0/${ACCOUNT_ID}/media`:`/v19.0/${ACCOUNT_ID}/posts`;
       const data=await apiCall(ep,params);
@@ -548,308 +673,488 @@ async function fetchAllMedia(){
   }catch(e){console.error('Media:',e);}
 }
 
-function getLikes(p){return p.like_count||p.reactions?.summary?.total_count||0;}
-function getComments(p){return p.comments_count||p.comments?.summary?.total_count||0;}
-function getEng(p){return getLikes(p)+getComments(p);}
-function getType(p){return p.media_type||(p.attachments?.data[0]?.media_type||p.attachments?.data[0]?.type||'POST');}
-function getDate(p){return new Date(p.timestamp||p.created_time);}
-function getCaption(p){return p.caption||p.message||p.story||'';}
+// HELPERS
+const getLikes=p=>p.like_count||p.reactions?.summary?.total_count||0;
+const getComments=p=>p.comments_count||p.comments?.summary?.total_count||0;
+const getEng=p=>getLikes(p)+getComments(p);
+const getType=p=>p.media_type||(p.attachments?.data[0]?.media_type||p.attachments?.data[0]?.type||'POST');
+const getDate=p=>new Date(p.timestamp||p.created_time);
+const getCap=p=>p.caption||p.message||p.story||'';
+const getTags=p=>(getCap(p).match(/#\w+/g)||[]).map(t=>t.toLowerCase());
 
-function renderOverview(){
+function getPeriodPosts(){
   const period=parseInt(document.getElementById('periodSel').value);
   const since=new Date(Date.now()-period*86400000);
-  const filtered=allPosts.filter(p=>getDate(p)>=since);
-  const totalLikes=filtered.reduce((s,p)=>s+getLikes(p),0);
-  const totalComments=filtered.reduce((s,p)=>s+getComments(p),0);
-  const sorted=[...filtered].sort((a,b)=>getEng(b)-getEng(a));
-  const best=sorted[0];
-  document.getElementById('kLikes').textContent=fmt(totalLikes);
-  document.getElementById('kComments').textContent=fmt(totalComments);
-  document.getElementById('kPeriodPosts').textContent=fmt(filtered.length);
-  if(best){document.getElementById('kBest').textContent=fmt(getEng(best));document.getElementById('kBestSub').textContent=fmt(getLikes(best))+' curtidas';}
-  const avgEng=filtered.length?Math.round(filtered.reduce((s,p)=>s+getEng(p),0)/filtered.length):0;
-  const engRate=window._followers?((avgEng/window._followers)*100).toFixed(2)+'%':'—';
-  document.getElementById('sEng').textContent=engRate;
-  // Engagement chart
-  const chartPosts=sorted.slice(0,20).reverse();
-  const labels=chartPosts.map(p=>getDate(p).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}));
-  const likes=chartPosts.map(p=>getLikes(p));
-  const comments=chartPosts.map(p=>getComments(p));
-  if(engChartInst)engChartInst.destroy();
-  engChartInst=new Chart(document.getElementById('engChart'),{
-    type:'bar',
-    data:{labels,datasets:[
-      {label:'Curtidas',data:likes,backgroundColor:'rgba(24,119,242,0.8)',borderRadius:3},
-      {label:'Comentários',data:comments,backgroundColor:'rgba(233,30,140,0.7)',borderRadius:3}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},scales:{x:{ticks:{font:{size:9},color:'#999',maxTicksLimit:12,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999',callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},stacked:true}}
-  });
-  // Type chart
-  const typeCounts={};
-  filtered.forEach(p=>{const t=getType(p);typeCounts[t]=(typeCounts[t]||0)+1;});
-  const tLabels=Object.keys(typeCounts),tVals=Object.values(typeCounts);
-  const tColors=['#6a1b9a','#1877F2','#E91E8C','#ff9800','#1D9E75'];
-  const total=tVals.reduce((a,b)=>a+b,0);
-  if(typeChartInst)typeChartInst.destroy();
-  typeChartInst=new Chart(document.getElementById('typeChart'),{
-    type:'doughnut',
-    data:{labels:tLabels,datasets:[{data:tVals,backgroundColor:tColors.slice(0,tLabels.length),borderWidth:0,hoverOffset:5}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'65%'}
-  });
-  document.getElementById('typeLegend').innerHTML=tLabels.map((l,i)=>`<span style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:2px;background:${tColors[i]};flex-shrink:0"></span>${l} · ${Math.round(tVals[i]/total*100)}%</span>`).join('');
-  // Media grid
-  renderMediaGrid(filtered.slice(0,12));
+  return allPosts.filter(p=>getDate(p)>=since);
 }
 
-function renderMediaGrid(posts){
-  const grid=document.getElementById('mediaGrid');
-  if(!posts?.length){grid.innerHTML='<div class="empty-state">Nenhuma publicação encontrada.</div>';return;}
+function renderOverview(){
+  const posts=getPeriodPosts();
+  const totalL=posts.reduce((s,p)=>s+getLikes(p),0);
+  const totalC=posts.reduce((s,p)=>s+getComments(p),0);
+  const sorted=[...posts].sort((a,b)=>getEng(b)-getEng(a));
+  const best=sorted[0];
+  const avgEng=posts.length?Math.round((totalL+totalC)/posts.length):0;
+  const engRate=_followers?((avgEng/_followers)*100):0;
+  const viral=posts.filter(p=>getLikes(p)>=1000).length;
+  const weeks=Math.max(1,parseInt(document.getElementById('periodSel').value)/7);
+  const freq=(posts.length/weeks).toFixed(1);
+
+  document.getElementById('kL').textContent=fmtN(totalL);
+  document.getElementById('kC').textContent=fmtN(totalC);
+  document.getElementById('kPP').textContent=fmtN(posts.length);
+  if(best){document.getElementById('kB').textContent=fmtN(getEng(best));document.getElementById('kBs').textContent=fmtN(getLikes(best))+' curtidas';}
+  document.getElementById('kAL').textContent=fmtN(posts.length?Math.round(totalL/posts.length):0);
+  document.getElementById('kAC').textContent=fmtN(posts.length?Math.round(totalC/posts.length):0);
+  document.getElementById('kV').textContent=fmtN(viral);
+  document.getElementById('kFq').textContent=freq;
+  document.getElementById('sE').textContent=fmtN(avgEng);
+  document.getElementById('sR').textContent=engRate.toFixed(2)+'%';
+
+  // Engagement chart
+  const chartPosts=sorted.slice(0,30).reverse();
+  const labels=chartPosts.map(p=>fmtD(getDate(p)));
+  killChart('engC');
+  charts['engC']=new Chart(document.getElementById('engC'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'Curtidas',data:chartPosts.map(p=>getLikes(p)),backgroundColor:'rgba(24,119,242,0.75)',borderRadius:3},{label:'Comentários',data:chartPosts.map(p=>getComments(p)),backgroundColor:'rgba(233,30,140,0.65)',borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{afterTitle:items=>{const p=chartPosts[items[0].dataIndex];return getCap(p).substring(0,50)||'';},label:c=>' '+c.dataset.label+': '+c.parsed.y.toLocaleString('pt-BR')}}}},scales:{x:{ticks:{font:{size:9},color:'#999',maxTicksLimit:12,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999',callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},stacked:true}
+  });
+
+  // Type chart
+  const tc={};posts.forEach(p=>{const t=getType(p);tc[t]=(tc[t]||0)+1;});
+  const tL=Object.keys(tc),tV=Object.values(tc);
+  const tC=['#6a1b9a','#1877F2','#E91E8C','#f57c00','#1D9E75'];
+  const tot=tV.reduce((a,b)=>a+b,0);
+  killChart('typeC');
+  charts['typeC']=new Chart(document.getElementById('typeC'),{type:'doughnut',data:{labels:tL,datasets:[{data:tV,backgroundColor:tC.slice(0,tL.length),borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'65%'}});
+  document.getElementById('typeLeg').innerHTML=tL.map((l,i)=>`<span style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:2px;background:${tC[i]};flex-shrink:0"></span>${l} · ${Math.round(tV[i]/tot*100)}%</span>`).join('');
+
+  // Media grid
+  const grid=document.getElementById('mGrid');
+  const recent=posts.slice(0,12);
+  if(!recent.length){grid.innerHTML='<div class="empty">Nenhum post no período.</div>';return;}
   grid.innerHTML='';
-  posts.forEach(p=>{
+  recent.forEach(p=>{
     const div=document.createElement('div');div.className='mitem';
     const img=p.media_url||p.thumbnail_url||'';
-    const cap=(getCaption(p)||'').substring(0,80);
-    div.innerHTML=img?`<img src="${img}" loading="lazy" alt="post" onerror="this.style.display='none'"><div class="mbadge">${getType(p)}</div><div class="mov"><span>♥ ${fmt(getLikes(p))}</span><span>💬 ${fmt(getComments(p))}</span></div>${cap?`<div class="mcap">${cap}</div>`:''}`
-      :`<div style="font-size:10px;color:var(--muted);text-align:center;padding:8px;z-index:1">${cap.substring(0,60)||'Post'}</div><div style="position:absolute;bottom:6px;font-size:10px;color:var(--muted)">♥ ${fmt(getLikes(p))}</div>`;
+    const cap=getCap(p).substring(0,100);
+    div.innerHTML=img?`<img src="${img}" loading="lazy" alt="" onerror="this.style.display='none'"><div class="mbadge">${getType(p)}</div><div class="mov"><span>♥${fmtN(getLikes(p))}</span><span>💬${fmtN(getComments(p))}</span></div>${cap?`<div class="mcap">${cap}</div>`:''}`:`<div style="font-size:10px;color:var(--muted);text-align:center;padding:8px;z-index:1">${cap.substring(0,60)||'Post'}</div><div style="position:absolute;bottom:8px;font-size:10px;color:var(--muted)">♥${fmtN(getLikes(p))}</div>`;
     if(p.permalink)div.onclick=()=>window.open(p.permalink,'_blank');
     grid.appendChild(div);
   });
 }
 
 function renderPostsTab(){
+  const filterType=document.getElementById('postFilterType').value;
+  const sortBy=document.getElementById('postSort').value;
+  let posts=[...allPosts];
+  if(filterType)posts=posts.filter(p=>getType(p)===filterType);
+  posts.sort((a,b)=>{
+    if(sortBy==='likes')return getLikes(b)-getLikes(a);
+    if(sortBy==='comments')return getComments(b)-getComments(a);
+    if(sortBy==='date')return getDate(b)-getDate(a);
+    return getEng(b)-getEng(a);
+  });
   const tbody=document.getElementById('postsBody');
-  if(!allPosts.length){tbody.innerHTML='<tr><td colspan="6" class="empty-state">Nenhum post.</td></tr>';return;}
+  if(!posts.length){tbody.innerHTML='<tr><td colspan="7" class="empty">Nenhum post.</td></tr>';return;}
   tbody.innerHTML='';
-  const sorted=[...allPosts].sort((a,b)=>getEng(b)-getEng(a));
-  const maxEng=getEng(sorted[0])||1;
-  sorted.forEach(p=>{
+  const maxEng=getEng(posts[0])||1;
+  posts.forEach(p=>{
     const l=getLikes(p),c=getComments(p),e=l+c;
     const type=getType(p);
     const tc=type==='VIDEO'||type==='REEL'?'pt-r':type==='CAROUSEL_ALBUM'?'pt-c':type==='IMAGE'?'pt-i':'pt-v';
-    const cap=(getCaption(p)||'—').substring(0,50);
-    const date=getDate(p).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+    const cap=(getCap(p)||'—').substring(0,50);
+    const er=_followers?((e/_followers)*100).toFixed(2)+'%':'—';
     const pct=Math.round(e/maxEng*100);
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="max-width:180px"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${cap}</div>${p.permalink?`<a href="${p.permalink}" target="_blank" style="font-size:10px;color:var(--blue)">ver post ↗</a>`:''}</td><td><span class="ptype ${tc}">${type}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px">${fmt(l)}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px">${fmt(c)}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--blue)">${fmt(e)}</span><div class="ebar"><div class="efill" style="width:${pct}%"></div></div></td><td style="font-size:11px;color:var(--muted)">${date}</td>`;
+    tr.innerHTML=`<td style="max-width:200px"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${cap||'(sem legenda)'}</div>${p.permalink?`<a href="${p.permalink}" target="_blank" style="font-size:10px">ver ↗</a>`:''}</td><td><span class="ptype ${tc}">${type}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px">${fmtN(l)}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px">${fmtN(c)}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--blue)">${fmtN(e)}</span><div class="ebar"><div class="efill" style="width:${pct}%"></div></div></td><td style="font-size:12px;color:var(--green)">${er}</td><td style="font-size:11px;color:var(--muted)">${fmtD(getDate(p),{day:'2-digit',month:'2-digit',year:'2-digit'})}</td>`;
     tbody.appendChild(tr);
   });
 }
 
 function renderHashtags(){
-  const hashMap={},hashEng={};
+  const hashCount={},hashEng={};
   allPosts.forEach(p=>{
-    const cap=getCaption(p);
-    const tags=(cap.match(/#\w+/g)||[]).map(t=>t.toLowerCase());
-    const eng=getEng(p);
-    tags.forEach(t=>{hashMap[t]=(hashMap[t]||0)+1;hashEng[t]=hashEng[t]||[];hashEng[t].push(eng);});
+    const tags=getTags(p);const eng=getEng(p);
+    tags.forEach(t=>{hashCount[t]=(hashCount[t]||0)+1;hashEng[t]=hashEng[t]||[];hashEng[t].push(eng);});
   });
-  const sorted=Object.entries(hashMap).sort((a,b)=>b[1]-a[1]);
-  const colors=['#1877F2','#E91E8C','#6a1b9a','#1D9E75','#f57c00','#c62828'];
+  const sortedFreq=Object.entries(hashCount).sort((a,b)=>b[1]-a[1]);
+  const sortedEng=Object.entries(hashEng).map(([t,vs])=>([t,Math.round(vs.reduce((a,b)=>a+b,0)/vs.length),vs.length])).sort((a,b)=>b[1]-a[1]);
+  const colors=['#1877F2','#E91E8C','#6a1b9a','#1D9E75','#f57c00','#c62828','#0F6E56','#854F0B'];
+
   // Cloud
-  const cloud=document.getElementById('hashtagCloud');
-  if(!sorted.length){cloud.innerHTML='<div class="empty-state">Nenhuma hashtag encontrada nas legendas.</div>';return;}
+  const cloud=document.getElementById('hCloud');
+  if(!sortedFreq.length){cloud.innerHTML='<div class="empty">Nenhuma hashtag encontrada.</div>';return;}
   cloud.innerHTML='';
-  const maxCount=sorted[0][1];
-  sorted.slice(0,30).forEach(([tag,count],i)=>{
-    const size=11+Math.round((count/maxCount)*10);
-    const color=colors[i%colors.length];
+  const maxC=sortedFreq[0][1];
+  sortedFreq.slice(0,35).forEach(([t,c],i)=>{
+    const size=11+Math.round((c/maxC)*10);
+    const col=colors[i%colors.length];
     const span=document.createElement('span');span.className='htag';
-    span.style.cssText=`font-size:${size}px;background:${color}15;color:${color};border:1px solid ${color}40;`;
-    span.textContent=`${tag} ${count}`;
+    span.style.cssText=`font-size:${size}px;background:${col}18;color:${col};border:1px solid ${col}35;`;
+    span.textContent=`${t} ×${c}`;
     cloud.appendChild(span);
   });
+
   // Eng list
-  const engSorted=Object.entries(hashEng).map(([t,vals])=>([t,Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)])).sort((a,b)=>b[1]-a[1]);
-  const engList=document.getElementById('hashtagEngList');
-  engList.innerHTML='';
-  const maxEng=engSorted[0]?.[1]||1;
-  engSorted.slice(0,10).forEach(([tag,avg],i)=>{
-    const pct=Math.round(avg/maxEng*100);
-    const color=colors[i%colors.length];
-    engList.innerHTML+=`<div class="aud-item"><span class="aud-l" style="font-size:11px;width:90px">${tag}</span><div class="aud-bw"><div class="aud-b" style="width:${pct}%;background:${color}"></div></div><span class="aud-v">${fmt(avg)}</span></div>`;
+  const el=document.getElementById('hEngList');el.innerHTML='';
+  const maxE=sortedEng[0]?.[1]||1;
+  sortedEng.slice(0,10).forEach(([t,avg,cnt],i)=>{
+    const pct=Math.round(avg/maxE*100);const col=colors[i%colors.length];
+    el.innerHTML+=`<div class="aud-item"><span class="aud-l" style="width:100px;font-size:11px">${t}</span><div class="aud-bw"><div class="aud-b" style="width:${pct}%;background:${col}"></div></div><span class="aud-v" style="font-size:11px">${fmtN(avg)}</span></div>`;
   });
+
   // Bar chart
-  const top10=engSorted.slice(0,10);
-  if(hashChartInst)hashChartInst.destroy();
-  hashChartInst=new Chart(document.getElementById('hashChart'),{
+  const top12=sortedEng.slice(0,12);
+  killChart('hBarC');
+  charts['hBarC']=new Chart(document.getElementById('hBarC'),{
     type:'bar',
-    data:{labels:top10.map(([t])=>t),datasets:[{label:'Eng. médio',data:top10.map(([,v])=>v),backgroundColor:top10.map((_,i)=>colors[i%colors.length]+'cc'),borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},y:{ticks:{font:{size:11},color:'#444'},grid:{display:false},border:{display:false}}}}
+    data:{labels:top12.map(([t])=>t),datasets:[{label:'Eng médio',data:top12.map(([,v])=>v),backgroundColor:top12.map((_,i)=>colors[i%colors.length]+'cc'),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},color:'#999',callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},y:{ticks:{font:{size:10},color:'#444'},grid:{display:false},border:{display:false}}}}
   });
+
+  // Freq chart
+  const top12f=sortedFreq.slice(0,12);
+  killChart('hFreqC');
+  charts['hFreqC']=new Chart(document.getElementById('hFreqC'),{
+    type:'bar',
+    data:{labels:top12f.map(([t])=>t),datasets:[{label:'Frequência',data:top12f.map(([,c])=>c),backgroundColor:'rgba(24,119,242,0.7)',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},color:'#999'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},y:{ticks:{font:{size:10},color:'#444'},grid:{display:false},border:{display:false}}}}
+  });
+
+  // Combos - top 5 posts com suas hashtags
+  const topPosts=[...allPosts].sort((a,b)=>getEng(b)-getEng(a)).slice(0,5);
+  const combos=document.getElementById('hCombos');
+  combos.innerHTML=topPosts.map(p=>{
+    const tags=getTags(p);
+    if(!tags.length)return'';
+    return`<div style="padding:10px 0;border-bottom:1px solid var(--border)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="badge b-blue">♥ ${fmtN(getLikes(p))}</span><span style="font-size:12px;color:var(--muted)">${getCap(p).substring(0,60)||'(sem legenda)'}</span></div><div style="display:flex;flex-wrap:wrap;gap:5px">${tags.slice(0,10).map((t,i)=>`<span style="font-size:11px;padding:2px 8px;border-radius:12px;background:${colors[i%colors.length]}18;color:${colors[i%colors.length]};border:1px solid ${colors[i%colors.length]}30">${t}</span>`).join('')}</div></div>`;
+  }).join('')||'<div class="empty">Sem dados suficientes.</div>';
 }
 
 function renderTiming(){
   const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  const dayEng=Array(7).fill(null).map(()=>({sum:0,count:0}));
-  const hourEng=Array(24).fill(null).map(()=>({sum:0,count:0}));
+  const dayEng=Array(7).fill(null).map(()=>({s:0,c:0}));
+  const hourEng=Array(24).fill(null).map(()=>({s:0,c:0}));
   const dayCount=Array(7).fill(0);
-  const heatmap=Array(7).fill(null).map(()=>Array(24).fill(null).map(()=>({sum:0,count:0})));
+  const hmap=Array(7).fill(null).map(()=>Array(24).fill(null).map(()=>({s:0,c:0})));
   allPosts.forEach(p=>{
     const d=getDate(p),e=getEng(p),dow=d.getDay(),h=d.getHours();
-    dayEng[dow].sum+=e;dayEng[dow].count++;
-    hourEng[h].sum+=e;hourEng[h].count++;
+    dayEng[dow].s+=e;dayEng[dow].c++;
+    hourEng[h].s+=e;hourEng[h].c++;
     dayCount[dow]++;
-    heatmap[dow][h].sum+=e;heatmap[dow][h].count++;
+    hmap[dow][h].s+=e;hmap[dow][h].c++;
   });
-  const dayAvg=dayEng.map(d=>d.count?Math.round(d.sum/d.count):0);
-  const hourAvg=hourEng.map(h=>h.count?Math.round(h.sum/h.count):0);
+  const dayAvg=dayEng.map(d=>d.c?Math.round(d.s/d.c):0);
+  const hourAvg=hourEng.map(h=>h.c?Math.round(h.s/h.c):0);
   const colors7=['#1877F2','#1D9E75','#E91E8C','#f57c00','#6a1b9a','#c62828','#888'];
-  if(dayChartInst)dayChartInst.destroy();
-  dayChartInst=new Chart(document.getElementById('dayChart'),{
-    type:'bar',data:{labels:days,datasets:[{data:dayAvg,backgroundColor:days.map((_,i)=>colors7[i]+'cc'),borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999',callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}
-  });
+  const maxDayIdx=dayAvg.indexOf(Math.max(...dayAvg));
+  const maxHourIdx=hourAvg.indexOf(Math.max(...hourAvg));
+
+  document.getElementById('bestDayLabel').textContent=`🏆 Melhor dia: ${days[maxDayIdx]} (média ${fmtN(dayAvg[maxDayIdx])} eng.)`;
+  document.getElementById('bestHourLabel').textContent=`🏆 Melhor horário: ${maxHourIdx}h (média ${fmtN(hourAvg[maxHourIdx])} eng.)`;
+
+  killChart('dayC');
+  charts['dayC']=new Chart(document.getElementById('dayC'),{type:'bar',data:{labels:days,datasets:[{data:dayAvg,backgroundColor:days.map((_,i)=>i===maxDayIdx?colors7[i]:colors7[i]+'88'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999',callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
   const hourLabels=Array.from({length:24},(_,i)=>i+'h');
-  if(hourChartInst)hourChartInst.destroy();
-  hourChartInst=new Chart(document.getElementById('hourChart'),{
-    type:'bar',data:{labels:hourLabels,datasets:[{data:hourAvg,backgroundColor:'rgba(24,119,242,0.7)',borderRadius:2}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:8},color:'#999',maxTicksLimit:12,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999',callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}
-  });
-  if(freqChartInst)freqChartInst.destroy();
-  freqChartInst=new Chart(document.getElementById('freqChart'),{
-    type:'bar',data:{labels:days,datasets:[{data:dayCount,backgroundColor:days.map((_,i)=>colors7[i]+'99'),borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}
-  });
+  killChart('hourC');
+  charts['hourC']=new Chart(document.getElementById('hourC'),{type:'bar',data:{labels:hourLabels,datasets:[{data:hourAvg,backgroundColor:hourAvg.map((v,i)=>i===maxHourIdx?'rgba(24,119,242,1)':'rgba(24,119,242,0.45)'),borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:8},color:'#999',maxTicksLimit:12,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999',callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
+  killChart('freqC');
+  charts['freqC']=new Chart(document.getElementById('freqC'),{type:'bar',data:{labels:days,datasets:[{data:dayCount,backgroundColor:days.map((_,i)=>colors7[i]+'99'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}});
+
   // Heatmap
-  const maxHeat=Math.max(...heatmap.flatMap(d=>d.map(h=>h.count?h.sum/h.count:0)));
-  const cont=document.getElementById('heatmapContainer');
-  let html='<div style="display:flex">';
-  html+='<div class="day-labels">';
-  days.forEach(d=>html+=`<div class="day-lbl">${d}</div>`);
-  html+='</div><div style="flex:1">';
-  html+=`<div style="display:grid;grid-template-columns:repeat(24,1fr);gap:2px;margin-bottom:2px">${Array.from({length:24},(_,h)=>`<div style="font-size:8px;color:var(--muted);text-align:center">${h}h</div>`).join('')}</div>`;
+  const maxHeat=Math.max(...hmap.flatMap(d=>d.map(h=>h.c?h.s/h.c:0)))||1;
+  const ncols=24;
+  let html=`<div class="hmap"><div class="hmap-days">`;
+  days.forEach(d=>html+=`<div class="hmap-dlbl">${d}</div>`);
+  html+=`</div><div class="hmap-cols"><div class="hmap-hlbls" style="grid-template-columns:repeat(${ncols},1fr)">`;
+  for(let h=0;h<ncols;h++)html+=`<div class="hmap-hlbl">${h}h</div>`;
+  html+='</div>';
   days.forEach((_,dow)=>{
-    html+=`<div style="display:grid;grid-template-columns:repeat(24,1fr);gap:2px;margin-bottom:2px">`;
-    for(let h=0;h<24;h++){
-      const v=heatmap[dow][h];
-      const avg=v.count?v.sum/v.count:0;
-      const intensity=maxHeat?avg/maxHeat:0;
-      const alpha=Math.round(intensity*0.85*100)/100;
-      html+=`<div style="height:24px;border-radius:3px;background:rgba(24,119,242,${alpha});display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:${intensity>0.5?'#fff':'transparent'}" title="${days[dow]} ${h}h: ${fmt(Math.round(avg))} eng médio"></div>`;
+    html+=`<div class="hmap-row" style="grid-template-columns:repeat(${ncols},1fr)">`;
+    for(let h=0;h<ncols;h++){
+      const v=hmap[dow][h];const avg=v.c?v.s/v.c:0;
+      const i=maxHeat?avg/maxHeat:0;const alpha=(i*0.85).toFixed(2);
+      html+=`<div class="hmap-cell" style="background:rgba(24,119,242,${alpha})" title="${days[dow]} ${h}h — ${v.c?fmtN(Math.round(avg))+' eng médio':'sem posts'}"></div>`;
     }
     html+='</div>';
   });
   html+='</div></div>';
-  cont.innerHTML=html;
+  document.getElementById('hmapWrap').innerHTML=html;
+
+  // Timing recommendations
+  const top3days=dayAvg.map((v,i)=>({i,v})).filter(d=>d.v>0).sort((a,b)=>b.v-a.v).slice(0,3);
+  const top3hours=hourAvg.map((v,i)=>({i,v})).filter(h=>h.v>0).sort((a,b)=>b.v-a.v).slice(0,3);
+  document.getElementById('timingRec').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div><div class="sec" style="margin-top:0">Melhores dias para postar</div>
+        ${top3days.map((d,i)=>`<div class="cmp-row"><span class="badge ${i===0?'b-blue':i===1?'b-green':'b-orange'}">${i+1}º</span><span style="font-size:13px;font-weight:500;margin-left:8px">${days[d.i]}</span><span style="margin-left:auto;font-size:12px;font-family:'Space Mono',monospace;color:var(--muted)">${fmtN(d.v)} eng médio</span></div>`).join('')}
+      </div>
+      <div><div class="sec" style="margin-top:0">Melhores horários para postar</div>
+        ${top3hours.map((h,i)=>`<div class="cmp-row"><span class="badge ${i===0?'b-blue':i===1?'b-green':'b-orange'}">${i+1}º</span><span style="font-size:13px;font-weight:500;margin-left:8px">${h.i}h – ${h.i+1}h</span><span style="margin-left:auto;font-size:12px;font-family:'Space Mono',monospace;color:var(--muted)">${fmtN(h.v)} eng médio</span></div>`).join('')}
+      </div>
+    </div>
+    <div style="margin-top:14px;padding:12px;background:var(--green-l);border-radius:var(--rs);font-size:13px;color:var(--teal)">
+      💡 <strong>Recomendação:</strong> Poste às <strong>${days[top3days[0]?.i||0]}s</strong> entre <strong>${top3hours[0]?.i||0}h e ${(top3hours[0]?.i||0)+2}h</strong> para maximizar seu engajamento.
+    </div>`;
 }
 
 function renderCalendar(){
-  const postDates={};
-  allPosts.forEach(p=>{
-    const d=getDate(p);
-    const key=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    if(!postDates[key])postDates[key]=[];
-    postDates[key].push(p);
-  });
-  window._postDates=postDates;
-  drawCalendar();
+  _postDates={};
+  allPosts.forEach(p=>{const d=getDate(p);const k=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;if(!_postDates[k])_postDates[k]=[];_postDates[k].push(p);});
+  drawCal();
+  renderMonthChart();
 }
 
-function drawCalendar(){
+function drawCal(){
   const months=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  document.getElementById('calMonthLabel').textContent=`${months[calMonth]} ${calYear}`;
+  document.getElementById('calLbl').textContent=`${months[calMonth]} ${calYear}`;
   const grid=document.getElementById('calGrid');grid.innerHTML='';
   const first=new Date(calYear,calMonth,1).getDay();
-  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const dim=new Date(calYear,calMonth+1,0).getDate();
   const today=new Date();
-  for(let i=0;i<first;i++){const d=document.createElement('div');d.className='cal-day empty';d.textContent='';grid.appendChild(d);}
-  for(let day=1;day<=daysInMonth;day++){
-    const key=`${calYear}-${calMonth}-${day}`;
-    const posts=window._postDates?.[key]||[];
+  for(let i=0;i<first;i++){const d=document.createElement('div');d.className='cday';grid.appendChild(d);}
+  let monthPosts=0,monthEng=0;
+  for(let day=1;day<=dim;day++){
+    const k=`${calYear}-${calMonth}-${day}`;
+    const posts=_postDates[k]||[];
+    monthPosts+=posts.length;
+    posts.forEach(p=>monthEng+=getEng(p));
     const d=document.createElement('div');
-    d.className='cal-day'+(posts.length?' has-post':'')+(today.getDate()===day&&today.getMonth()===calMonth&&today.getFullYear()===calYear?' today':'');
-    d.textContent=day;
-    if(posts.length){
-      d.title=`${posts.length} post(s)`;
-      d.onclick=()=>showCalPosts(posts,day);
-    }
+    const isToday=today.getDate()===day&&today.getMonth()===calMonth&&today.getFullYear()===calYear;
+    d.className='cday'+(posts.length?' has':'')+(isToday?' today':'');
+    d.innerHTML=`${day}${posts.length?'<div class="cdot"></div>':''}`;
+    if(posts.length){d.title=`${posts.length} post(s)`;d.onclick=()=>showCalDay(posts,day);}
     grid.appendChild(d);
   }
-  document.getElementById('calPostDetail').style.display='none';
+  const calStatSub=document.getElementById('calStatSub');
+  const calStats=document.getElementById('calStats');
+  calStatSub.textContent=`${months[calMonth]} ${calYear}`;
+  calStats.innerHTML=`
+    <div class="g2" style="margin-bottom:0">
+      <div style="padding:14px;background:var(--blue-l);border-radius:var(--rs);text-align:center"><div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--blue)">${monthPosts}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">posts publicados</div></div>
+      <div style="padding:14px;background:var(--green-l);border-radius:var(--rs);text-align:center"><div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--teal)">${fmtN(monthEng)}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">engajamentos totais</div></div>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--muted)">
+      ${monthPosts>0?`Média de ${(monthEng/monthPosts).toFixed(0)} engajamentos por post neste mês.`:'Sem posts neste mês.'}
+    </div>`;
+  document.getElementById('calDetail').style.display='none';
 }
 
-function showCalPosts(posts,day){
-  const detail=document.getElementById('calPostDetail');
-  const list=document.getElementById('calPostList');
-  detail.style.display='block';
-  list.innerHTML=posts.map(p=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="ptype ${getType(p)==='VIDEO'||getType(p)==='REEL'?'pt-r':'pt-i'}">${getType(p)}</span><span style="font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(getCaption(p)||'—').substring(0,60)}</span><span style="font-size:12px;font-family:'Space Mono',monospace;color:var(--blue)">♥${fmt(getLikes(p))}</span>${p.permalink?`<a href="${p.permalink}" target="_blank" style="font-size:11px;color:var(--blue)">↗</a>`:''}</div>`).join('');
+function showCalDay(posts,day){
+  const det=document.getElementById('calDetail');det.style.display='block';
+  document.getElementById('calList').innerHTML=posts.map(p=>`<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="ptype ${getType(p)==='VIDEO'||getType(p)==='REEL'?'pt-r':'pt-i'}">${getType(p)}</span><span style="font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${getCap(p).substring(0,55)||'—'}</span><span style="font-size:12px;font-family:'Space Mono',monospace;color:var(--blue)">♥${fmtN(getLikes(p))}</span>${p.permalink?`<a href="${p.permalink}" target="_blank" style="font-size:11px">↗</a>`:''}</div>`).join('');
 }
 
-function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}drawCalendar();}
-function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}drawCalendar();}
+const calPrev=()=>{calMonth--;if(calMonth<0){calMonth=11;calYear--;}drawCal();};
+const calNext=()=>{calMonth++;if(calMonth>11){calMonth=0;calYear++;}drawCal();};
+
+function renderMonthChart(){
+  const monthMap={};
+  allPosts.forEach(p=>{const d=getDate(p);const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;if(!monthMap[k])monthMap[k]={count:0,eng:0};monthMap[k].count++;monthMap[k].eng+=getEng(p);});
+  const sorted=Object.entries(monthMap).sort(([a],[b])=>a.localeCompare(b)).slice(-12);
+  const labels=sorted.map(([k])=>{const[y,m]=k.split('-');return`${m}/${y.slice(2)}`;});
+  killChart('monthC');
+  charts['monthC']=new Chart(document.getElementById('monthC'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'Posts',data:sorted.map(([,v])=>v.count),backgroundColor:'rgba(24,119,242,0.7)',borderRadius:3,yAxisID:'y'},{label:'Eng total',data:sorted.map(([,v])=>v.eng),type:'line',borderColor:'#E91E8C',backgroundColor:'rgba(233,30,140,0.1)',borderWidth:2,fill:true,tension:0.4,pointRadius:3,yAxisID:'y1'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:10}}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false},position:'left'},y1:{ticks:{font:{size:9},color:'#E91E8C',callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{display:false},border:{display:false},position:'right'}}}
+  });
+}
+
+function renderCompare(){
+  if(!allPosts.length)return;
+  // Weekly evolution
+  const weekMap={};
+  allPosts.forEach(p=>{const d=getDate(p);const week=Math.floor((Date.now()-d)/(7*86400000));const k=`w${week}`;if(!weekMap[k])weekMap[k]={eng:0,count:0};weekMap[k].eng+=getEng(p);weekMap[k].count++;});
+  const wSorted=Object.entries(weekMap).sort(([a],[b])=>parseInt(b.slice(1))-parseInt(a.slice(1))).slice(0,16).reverse();
+  killChart('evolC');
+  charts['evolC']=new Chart(document.getElementById('evolC'),{
+    type:'line',
+    data:{labels:wSorted.map(([k])=>`Sem ${Math.abs(parseInt(k.slice(1)))} atrás`),datasets:[{label:'Eng médio/post',data:wSorted.map(([,v])=>v.count?Math.round(v.eng/v.count):0),borderColor:'#1877F2',backgroundColor:'rgba(24,119,242,0.07)',borderWidth:2,fill:true,tension:0.4,pointRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},color:'#999',maxTicksLimit:8,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999',callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}
+  });
+
+  // Cumulative likes
+  const postsSorted=[...allPosts].sort((a,b)=>getDate(a)-getDate(b));
+  let cum=0;
+  const cumData=postsSorted.map(p=>{cum+=getLikes(p);return{x:fmtD(getDate(p)),y:cum};});
+  const step=Math.max(1,Math.floor(cumData.length/30));
+  const sampled=cumData.filter((_,i)=>i%step===0||i===cumData.length-1);
+  killChart('likeGrowC');
+  charts['likeGrowC']=new Chart(document.getElementById('likeGrowC'),{
+    type:'line',
+    data:{labels:sampled.map(d=>d.x),datasets:[{label:'Curtidas acumuladas',data:sampled.map(d=>d.y),borderColor:'#E91E8C',backgroundColor:'rgba(233,30,140,0.07)',borderWidth:2,fill:true,tension:0.4,pointRadius:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},color:'#999',maxTicksLimit:8,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999',callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}
+  });
+
+  // Half comparison
+  const half=Math.floor(allPosts.length/2);
+  const first=allPosts.slice(half),second=allPosts.slice(0,half);
+  const hAvg=arr=>arr.length?Math.round(arr.reduce((s,p)=>s+getEng(p),0)/arr.length):0;
+  const fA=hAvg(first),sA=hAvg(second);
+  const diff=sA-fA,pct=fA?Math.round((diff/fA)*100):0;
+  document.getElementById('halfComp').innerHTML=`
+    <div style="margin-bottom:12px"><div class="sec" style="margin-top:0">Primeiros ${fmtN(first.length)} posts</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700">${fmtN(fA)}<span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:5px">eng médio</span></div></div>
+    <div style="margin-bottom:12px"><div class="sec">Últimos ${fmtN(second.length)} posts</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700">${fmtN(sA)}<span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:5px">eng médio</span></div></div>
+    <div style="padding:10px;border-radius:var(--rs);background:${diff>=0?'var(--green-l)':'var(--red-l)'}">
+      <span style="font-size:13px;font-weight:600;color:${diff>=0?'var(--teal)':'var(--red)'}">${diff>=0?'📈':'📉'} ${diff>=0?'+':''}${pct}% de evolução</span>
+    </div>`;
+
+  // Type comparison
+  const typeMap={};
+  allPosts.forEach(p=>{const t=getType(p);if(!typeMap[t])typeMap[t]={sum:0,count:0};typeMap[t].sum+=getEng(p);typeMap[t].count++;});
+  const typeSorted=Object.entries(typeMap).sort((a,b)=>b[1].sum/b[1].count-a[1].sum/a[1].count);
+  const maxTE=typeSorted[0]?typeSorted[0][1].sum/typeSorted[0][1].count:1;
+  const tColors=['#6a1b9a','#1877F2','#E91E8C','#f57c00','#1D9E75'];
+  document.getElementById('typeComp').innerHTML=typeSorted.map(([t,v],i)=>{
+    const avg=Math.round(v.sum/v.count);const pct=Math.round(avg/maxTE*100);
+    return`<div class="cmp-row"><span class="cmp-label">${t}</span><div class="cmp-bar-wrap"><div class="cmp-bar" style="width:${pct}%;background:${tColors[i%tColors.length]}"></div></div><span class="cmp-val">${fmtN(avg)}</span></div>`;
+  }).join('')||'<div class="empty">Sem dados.</div>';
+
+  // All time best
+  const top3=[...allPosts].sort((a,b)=>getEng(b)-getEng(a)).slice(0,3);
+  document.getElementById('allTimeBest').innerHTML=top3.map((p,i)=>`
+    <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:center">
+      <div style="font-size:20px">${['🥇','🥈','🥉'][i]}</div>
+      <div style="flex:1"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px">${getCap(p).substring(0,50)||'(sem legenda)'}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">${fmtD(getDate(p),{day:'2-digit',month:'2-digit',year:'numeric'})}</div></div>
+      <div style="text-align:right"><div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--blue)">${fmtN(getLikes(p))}</div><div style="font-size:10px;color:var(--muted)">curtidas</div></div>
+    </div>`).join('');
+}
+
+function renderIdeas(){
+  if(!allPosts.length)return;
+  const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const dayEng=Array(7).fill(null).map(()=>({s:0,c:0}));
+  const hourEng=Array(24).fill(null).map(()=>({s:0,c:0}));
+  const typeEng={};const hashEngMap={};
+  allPosts.forEach(p=>{
+    const d=getDate(p),e=getEng(p),dow=d.getDay(),h=d.getHours();
+    dayEng[dow].s+=e;dayEng[dow].c++;
+    hourEng[h].s+=e;hourEng[h].c++;
+    const t=getType(p);if(!typeEng[t])typeEng[t]={s:0,c:0};typeEng[t].s+=e;typeEng[t].c++;
+    getTags(p).forEach(tag=>{if(!hashEngMap[tag])hashEngMap[tag]={s:0,c:0};hashEngMap[tag].s+=e;hashEngMap[tag].c++;});
+  });
+  const bestDay=dayEng.reduce((b,d,i)=>d.c&&d.s/d.c>(b.v||0)?{i,v:d.s/d.c}:b,{});
+  const bestHour=hourEng.reduce((b,h,i)=>h.c&&h.s/h.c>(b.v||0)?{i,v:h.s/h.c}:b,{});
+  const bestType=Object.entries(typeEng).sort((a,b)=>b[1].s/b[1].c-a[1].s/a[1].c)[0];
+  const top3hash=Object.entries(hashEngMap).sort((a,b)=>b[1].s/b[1].c-a[1].s/a[1].c).slice(0,3).map(([t])=>t);
+  const top3hashFreq=Object.entries(hashEngMap).sort((a,b)=>b[1].c-a[1].c).slice(0,3).map(([t])=>t);
+  const top3posts=[...allPosts].sort((a,b)=>getEng(b)-getEng(a)).slice(0,3);
+  const avgEng=allPosts.length?Math.round(allPosts.reduce((s,p)=>s+getEng(p),0)/allPosts.length):0;
+  const weeks=allPosts.length>=2?Math.max(1,(getDate(allPosts[0])-getDate(allPosts[allPosts.length-1]))/(7*86400000)):1;
+  const freq=allPosts.length/weeks;
+
+  const ideas=[
+    {icon:'📅',color:'#e3f0fd',badge:'Horário',badgeClass:'b-blue',title:`Poste toda ${days[bestDay.i||0]} entre ${bestHour.i||0}h e ${(bestHour.i||0)+2}h`,text:`Seus dados mostram que posts publicados às ${days[bestDay.i||0]}s no horário das ${bestHour.i||0}h recebem em média ${fmtN(Math.round(bestDay.v||0))} interações — significativamente acima da sua média geral de ${fmtN(avgEng)}.`},
+    {icon:'🎬',color:'#f3e5f5',badge:'Formato',badgeClass:'b-purple',title:`Priorize ${bestType?bestType[0]:'vídeo'} — seu formato mais eficaz`,text:`Posts do tipo ${bestType?bestType[0]:'vídeo'} geram em média ${fmtN(Math.round(bestType?bestType[1].s/bestType[1].c:0))} de engajamento na sua conta. Invista mais nesse formato.`},
+    {icon:'#️⃣',color:var(--orange-l),badge:'Hashtags',badgeClass:'b-orange',title:`Use as hashtags ${top3hash.slice(0,2).join(', ')} nos próximos posts`,text:`Essas hashtags têm a maior média de engajamento nos seus posts. Combine pelo menos 2 delas com hashtags menores de nicho para ampliar o alcance orgânico.`},
+    {icon:'🔁',color:'var(--green-l)',badge:'Conteúdo',badgeClass:'b-green',title:'Reutilize seu melhor conteúdo em novo formato',text:`Seu post mais engajado teve ${fmtN(getLikes(top3posts[0]))} curtidas. Transforme esse tema em carrossel, Reel ou série de posts para aproveitar o interesse já validado pela sua audiência.`},
+    {icon:'💬',color:'#fff8e1',badge:'Engajamento',badgeClass:'b-orange',title:'Termine legendas com perguntas diretas',text:`Posts com perguntas nas legendas recebem até 2x mais comentários. Experimente: "Qual dos dois você prefere?", "Me conta nos comentários 👇" ou "Concorda com isso?"`},
+    {icon:'📊',color:var(--blue-l),badge:'Frequência',badgeClass:'b-blue',title:freq<3?'Aumente sua frequência de posts para 4-5x por semana':`Você está postando ${freq.toFixed(1)}x/semana — mantenha o ritmo!`,text:freq<3?`Sua frequência atual é de ${freq.toFixed(1)} posts por semana. Contas que postam 4-5x/semana têm 67% mais crescimento orgânico. Tente criar conteúdo em lote uma vez por semana para manter a consistência.`:`Sua consistência de ${freq.toFixed(1)} posts por semana é excelente. Foque agora na qualidade e diversidade dos formatos para manter o crescimento.`},
+    {icon:'🎯',color:'#f3e5f5',badge:'Estratégia',badgeClass:'b-purple',title:'Crie uma série temática semanal',text:`Defina um dia fixo para um tema recorrente (ex: "Segunda da Motivação", "Quinta do Bastidor"). Séries criam expectativa na audiência e aumentam o retorno de seguidores fiéis.`},
+    {icon:'📱',color:var(--green-l),badge:'Reels',badgeClass:'b-green',title:'Transforme seus melhores posts em Reels curtos',text:`Reels de 7-15 segundos com os primeiros 2 segundos impactantes recebem até 3x mais alcance orgânico que posts estáticos. Pegue o tema dos seus posts mais curtidos e adapte em formato de vídeo rápido.`},
+    {icon:'⏱️',color:'#fff8e1',badge:'Formato',badgeClass:'b-orange',title:'Carrosséis geram mais salvamentos que outros formatos',text:`Posts em carrossel têm taxa de salvamento até 3x maior que imagens simples. Transforme dicas, tutoriais ou listas em carrosséis de 5-10 slides com visual coeso.`},
+    {icon:'🤝',color:var(--blue-l),badge:'Comunidade',badgeClass:'b-blue',title:'Responda comentários nas primeiras 2 horas após postar',text:`O algoritmo do Instagram prioriza posts com alto engajamento inicial. Responder comentários nas primeiras 2 horas após publicar sinaliza atividade ao algoritmo e amplia a distribuição orgânica do post.`},
+  ];
+
+  const container=document.getElementById('ideasContainer');
+  container.innerHTML=ideas.map(idea=>`
+    <div class="idea-card">
+      <div class="idea-icon" style="background:${idea.color}">${idea.icon}</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+          <div class="idea-title">${idea.title}</div>
+          <span class="badge ${idea.badgeClass}">${idea.badge}</span>
+        </div>
+        <div class="idea-text">${idea.text}</div>
+      </div>
+    </div>`).join('');
+}
 
 function renderInsights(){
-  const posts=allPosts;
-  if(!posts.length)return;
-  const followers=window._followers||0;
-  const totalEng=posts.reduce((s,p)=>s+getEng(p),0);
-  const avgEng=posts.length?totalEng/posts.length:0;
-  const engRate=followers?((avgEng/followers)*100):0;
-  // Score consistency: posts por semana
-  if(posts.length>=2){
-    const oldest=getDate(posts[posts.length-1]);
-    const newest=getDate(posts[0]);
-    const weeks=Math.max(1,(newest-oldest)/(7*86400000));
-    const postsPerWeek=posts.length/weeks;
-    const score=Math.min(100,Math.round(postsPerWeek/3*100));
-    drawGauge('scoreChart',score,'#1877F2');
-    document.getElementById('scoreNum').textContent=score;
-    document.getElementById('scoreLabel').textContent=score>=80?'Excelente consistência':score>=50?'Consistência moderada':'Precisa postar mais';
-  }
-  // Eng rate gauge
-  const engRateScore=Math.min(100,Math.round(engRate*10));
-  drawGauge('engRateChart',engRateScore,'#1D9E75');
-  document.getElementById('engRateNum').textContent=engRate.toFixed(2)+'%';
-  document.getElementById('engRateLabel').textContent=engRate>=3?'Taxa excelente':engRate>=1?'Taxa boa':engRate>=0.5?'Taxa média':'Taxa baixa';
-  // Recommendations
+  if(!allPosts.length)return;
   const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  const dayEng=Array(7).fill(null).map(()=>({sum:0,count:0}));
-  const hourEng=Array(24).fill(null).map(()=>({sum:0,count:0}));
-  const hashEng={};
-  const typeEng={};
-  posts.forEach(p=>{
-    const d=getDate(p),e=getEng(p),dow=d.getDay(),h=d.getHours();
-    dayEng[dow].sum+=e;dayEng[dow].count++;
-    hourEng[h].sum+=e;hourEng[h].count++;
-    const type=getType(p);typeEng[type]=typeEng[type]||{sum:0,count:0};typeEng[type].sum+=e;typeEng[type].count++;
-    (getCaption(p).match(/#\w+/g)||[]).forEach(t=>{const tl=t.toLowerCase();hashEng[tl]=hashEng[tl]||{sum:0,count:0};hashEng[tl].sum+=e;hashEng[tl].count++;});
-  });
-  const bestDay=dayEng.reduce((b,d,i)=>d.count&&d.sum/d.count>(b.v||0)?{i,v:d.sum/d.count}:b,{});
-  const bestHour=hourEng.reduce((b,h,i)=>h.count&&h.sum/h.count>(b.v||0)?{i,v:h.sum/h.count}:b,{});
-  const bestType=Object.entries(typeEng).sort((a,b)=>b[1].sum/b[1].count-a[1].sum/a[1].count)[0];
-  const bestHash=Object.entries(hashEng).sort((a,b)=>b[1].sum/b[1].count-a[1].sum/a[1].count)[0];
-  const insights=[];
-  if(bestDay.i!==undefined)insights.push({icon:'📅',color:'#e3f0fd',text:`Poste às <strong>${days[bestDay.i]}s</strong> — é o dia com maior engajamento médio (${fmt(Math.round(bestDay.v))} interações por post).`});
-  if(bestHour.i!==undefined)insights.push({icon:'⏰',color:'#e1f5ee',text:`O melhor horário é por volta das <strong>${bestHour.i}h</strong>, quando seus posts recebem mais curtidas e comentários.`});
-  if(bestType)insights.push({icon:'🎬',color:'#f3e5f5',text:`Conteúdo do tipo <strong>${bestType[0]}</strong> performa melhor na sua conta. Priorize esse formato.`});
-  if(bestHash)insights.push({icon:'#️⃣',color:'#fff3e0',text:`A hashtag <strong>${bestHash[0]}</strong> gera mais engajamento em média. Use-a com frequência.`});
-  if(engRate<1)insights.push({icon:'📈',color:'#ffebee',text:`Sua taxa de engajamento está em ${engRate.toFixed(2)}%. Experimente fazer mais perguntas nas legendas e responder comentários.`});
-  const list=document.getElementById('insightsList');
-  list.innerHTML=insights.map(ins=>`<div class="insight-item"><div class="insight-icon" style="background:${ins.color}">${ins.icon}</div><div class="insight-text">${ins.text}</div></div>`).join('')||'<div class="empty-state">Sem dados suficientes para gerar insights.</div>';
+  const totalEng=allPosts.reduce((s,p)=>s+getEng(p),0);
+  const avgEng=allPosts.length?totalEng/allPosts.length:0;
+  const engRate=_followers?((avgEng/_followers)*100):0;
+  const typeSet=new Set(allPosts.map(p=>getType(p)));
+  const diversityScore=Math.min(100,Math.round((typeSet.size/3)*100));
+  const weeks=allPosts.length>=2?Math.max(1,(getDate(allPosts[0])-getDate(allPosts[allPosts.length-1]))/(7*86400000)):1;
+  const postsPerWeek=allPosts.length/weeks;
+  const consistencyScore=Math.min(100,Math.round(postsPerWeek/5*100));
+  const engRateScore=Math.min(100,Math.round(engRate*20));
+
+  drawGauge('scoreC',consistencyScore,'#1877F2');
+  document.getElementById('scoreN').textContent=consistencyScore;
+  document.getElementById('scoreLbl').textContent=consistencyScore>=80?'🟢 Excelente':consistencyScore>=50?'🟡 Moderado':'🔴 Precisa melhorar';
+
+  drawGauge('erC',engRateScore,'#1D9E75');
+  document.getElementById('erN').textContent=engRate.toFixed(1)+'%';
+  document.getElementById('erLbl').textContent=engRate>=3?'🟢 Excelente':engRate>=1?'🟡 Bom':engRate>=0.5?'🟠 Médio':'🔴 Baixo';
+
+  drawGauge('divC',diversityScore,'#6a1b9a');
+  document.getElementById('divN').textContent=diversityScore;
+  document.getElementById('divLbl').textContent=typeSet.size>=3?'🟢 Alta diversidade':typeSet.size>=2?'🟡 Moderada':'🔴 Pouca diversidade';
+
+  // Recommendations
+  const recs=[];
+  if(postsPerWeek<3)recs.push({icon:'📅',bg:'var(--orange-l)',color:'var(--orange)',title:'Aumente a frequência',text:`Você posta ${postsPerWeek.toFixed(1)}x/semana. Meta ideal: 4-5x/semana.`});
+  if(engRate<1)recs.push({icon:'💬',bg:'var(--red-l)',color:'var(--red)',title:'Engajamento baixo',text:`Taxa de ${engRate.toFixed(2)}%. Tente posts mais interativos com perguntas e CTAs.`});
+  if(typeSet.size<2)recs.push({icon:'🎬',bg:'#f3e5f5',color:'var(--purple)',title:'Diversifique formatos',text:`Você usa principalmente um tipo de conteúdo. Experimente Reels, carrosséis e imagens.`});
+  if(postsPerWeek>=4&&engRate>=2)recs.push({icon:'🚀',bg:'var(--green-l)',color:'var(--teal)',title:'Excelente performance!',text:`Consistência ótima e boa taxa de engajamento. Foco agora em crescer seguidores.`});
+  if(!recs.length)recs.push({icon:'✅',bg:'var(--green-l)',color:'var(--teal)',title:'Perfil saudável',text:`Seus indicadores estão dentro do esperado. Continue monitorando regularmente.`});
+
+  document.getElementById('recList').innerHTML=recs.map(r=>`<div class="insight-card"><div class="ic-icon" style="background:${r.bg};color:${r.color}">${r.icon}</div><div><div class="ic-title">${r.title}</div><div class="ic-text">${r.text}</div></div></div>`).join('');
+
+  // Diagnosis
+  const diag=[
+    {label:'Total de posts',val:fmtN(allPosts.length),good:allPosts.length>=50},
+    {label:'Posts/semana',val:postsPerWeek.toFixed(1),good:postsPerWeek>=3},
+    {label:'Eng. médio/post',val:fmtN(Math.round(avgEng)),good:avgEng>=100},
+    {label:'Taxa de engajamento',val:engRate.toFixed(2)+'%',good:engRate>=1},
+    {label:'Formatos diferentes',val:typeSet.size,good:typeSet.size>=2},
+    {label:'Posts virais (1k+)',val:fmtN(allPosts.filter(p=>getLikes(p)>=1000).length),good:allPosts.filter(p=>getLikes(p)>=1000).length>=1},
+  ];
+  document.getElementById('diagList').innerHTML=diag.map(d=>`<div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;color:var(--muted);flex:1">${d.label}</span><span style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;margin-right:10px">${d.val}</span><span style="font-size:16px">${d.good?'✅':'⚠️'}</span></div>`).join('');
+
+  // Benchmarks
+  document.getElementById('benchmarks').innerHTML=`
+    <div style="margin-bottom:10px;font-size:12px;color:var(--muted)">Comparação com médias do mercado para criadores de conteúdo no Brasil</div>
+    ${[
+      {label:'Taxa de engajamento',yours:engRate.toFixed(2)+'%',market:'1-3%',good:engRate>=1},
+      {label:'Posts por semana',yours:postsPerWeek.toFixed(1),market:'3-7',good:postsPerWeek>=3},
+      {label:'Média curtidas/post',yours:fmtN(Math.round(allPosts.reduce((s,p)=>s+getLikes(p),0)/allPosts.length)),market:'50-500',good:true},
+      {label:'Diversidade de formatos',yours:typeSet.size+' tipos',market:'2-4 tipos',good:typeSet.size>=2},
+    ].map(b=>`<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;flex:1">${b.label}</span><span style="font-size:12px;font-weight:600;min-width:70px">${b.yours}</span><span style="font-size:11px;color:var(--muted);min-width:80px">Mercado: ${b.market}</span><span>${b.good?'✅':'⚠️'}</span></div>`).join('')}`;
 }
 
 function drawGauge(id,score,color){
-  const canvas=document.getElementById(id);
+  const canvas=document.getElementById(id);if(!canvas)return;
   const ctx=canvas.getContext('2d');
-  const cx=45,cy=45,r=35,start=Math.PI*0.75,end=Math.PI*0.25;
-  ctx.clearRect(0,0,90,90);
-  ctx.beginPath();ctx.arc(cx,cy,r,start,end+Math.PI*2);ctx.strokeStyle='#f0f0ec';ctx.lineWidth=8;ctx.lineCap='round';ctx.stroke();
-  const progress=start+(end+Math.PI*2-start)*(score/100);
-  ctx.beginPath();ctx.arc(cx,cy,r,start,progress);ctx.strokeStyle=color;ctx.lineWidth=8;ctx.lineCap='round';ctx.stroke();
+  const cx=50,cy=50,r=38,start=Math.PI*.75,end=Math.PI*.25+Math.PI*2;
+  ctx.clearRect(0,0,100,100);
+  ctx.beginPath();ctx.arc(cx,cy,r,start,end);ctx.strokeStyle='#f0f0ec';ctx.lineWidth=9;ctx.lineCap='round';ctx.stroke();
+  const prog=start+(end-start)*(score/100);
+  ctx.beginPath();ctx.arc(cx,cy,r,start,prog);ctx.strokeStyle=color;ctx.lineWidth=9;ctx.lineCap='round';ctx.stroke();
 }
 
-async function onPeriodChange(){renderOverview();}
+async function onPeriodChange(){renderOverview();renderPostsTab();}
+async function refreshData(){setLov('Atualizando dados...');await fetchAllMedia();renderOverview();renderHashtags();renderTiming();renderCalendar();renderCompare();renderIdeas();renderInsights();setLov(null);}
 
 function logout(){
-  TOKEN='';PROXY='';ACCOUNT_ID='';allPosts=[];accountsData=[];
+  TOKEN='';PROXY='';ACCOUNT_ID='';allPosts=[];accountsData=[];_followers=0;
   document.getElementById('loginScreen').style.display='flex';
-  document.getElementById('topbar').style.display='none';
-  document.getElementById('tabs').style.display='none';
-  document.getElementById('dashboard').style.display='none';
+  document.getElementById('appShell').style.display='none';
   document.getElementById('tokenInput').value='';
   document.getElementById('accsSection').style.display='none';
-  document.getElementById('connBtn').textContent='Conectar minha conta';
+  document.getElementById('connBtn').textContent='Conectar e analisar';
   showSt(null);
+  Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});
+  charts={};
 }
 </script>
 </body>
