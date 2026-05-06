@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetaInsights — Análise de Perfil</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --blue: #1877F2;
+    --blue-light: #e3f0fd;
+    --pink: #E91E8C;
+    --bg: #f5f5f0;
+    --card: #ffffff;
+    --border: rgba(0,0,0,0.08);
+    --text: #1a1a1a;
+    --muted: #6b6b6b;
+    --success: #2e7d32;
+    --success-bg: #e8f5e9;
+    --danger: #c62828;
+    --danger-bg: #ffebee;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* LOGIN SCREEN */
+  #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .login-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 40px; max-width: 520px; width: 100%; }
+  .login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+  .login-logo-mark { width: 36px; height: 36px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .login-logo-mark svg { width: 18px; height: 18px; }
+  .login-logo span { font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700; color: var(--text); }
+  .login-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+  .login-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+  .field-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+  .token-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .token-input { flex: 1; font-family: 'Space Mono', monospace; font-size: 12px; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fafafa; color: var(--text); outline: none; transition: border 0.2s; }
+  .token-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(24,119,242,0.1); }
+  .btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; white-space: nowrap; }
+  .btn:hover { background: #f5f5f0; }
+  .btn-blue { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .btn-blue:hover { background: #1566d6; }
+  .btn-blue:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-full { width: 100%; justify-content: center; padding: 12px; font-size: 14px; }
+  .status { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; display: none; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .status-error { background: var(--danger-bg); color: var(--danger); border: 1px solid #ffcdd2; }
+  .status-loading { background: var(--blue-light); color: #0C447C; border: 1px solid #b5d4f4; }
+  .perms { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .perm { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .perm-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+  .tip { background: #fff8e1; border: 1px solid #ffe082; border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12px; color: #5d4037; margin-bottom: 20px; line-height: 1.5; }
+  .tip a { color: #1877F2; }
+
+  /* ACCOUNTS */
+  .accounts-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .account-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; }
+  .account-item:hover { border-color: var(--blue); background: var(--blue-light); }
+  .account-item.selected { border-color: var(--blue); background: var(--blue-light); }
+  .acc-av { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .acc-name { font-size: 14px; font-weight: 500; }
+  .acc-type { font-size: 12px; color: var(--muted); }
+  .acc-check { margin-left: auto; color: var(--blue); font-size: 18px; display: none; }
+  .account-item.selected .acc-check { display: block; }
+
+  /* TOPBAR */
+  #topbar { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 24px; height: 54px; display: none; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .topbar-logo { display: flex; align-items: center; gap: 8px; font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; }
+  .topbar-logo-mark { width: 28px; height: 28px; background: var(--blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; }
+  .badge-green { background: var(--success-bg); color: var(--success); }
+  .badge-blue { background: var(--blue-light); color: var(--blue); }
+  .dot-green { width: 6px; height: 6px; border-radius: 50%; background: #43a047; }
+
+  /* DASHBOARD */
+  #dashboard { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; }
+  .profile-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
+  .profile-av { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff; background: var(--blue); flex-shrink: 0; }
+  .profile-info h2 { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
+  .profile-info p { font-size: 13px; color: var(--muted); }
+  .profile-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .tag { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 4px; }
+  .tag-blue { background: var(--blue-light); color: var(--blue); }
+  .tag-gray { background: #f0f0ec; color: var(--muted); border: 1px solid var(--border); }
+  .profile-stats { margin-left: auto; display: flex; gap: 28px; text-align: right; }
+  .pstat-val { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; }
+  .pstat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* KPI GRID */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+  .kpi-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi-value { font-family: 'Space Mono', monospace; font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .kpi-delta { font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+  .delta-pos { color: var(--success); }
+  .delta-neg { color: var(--danger); }
+
+  /* CHARTS */
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .chart-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .chart-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .legend { display: flex; gap: 16px; margin-bottom: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  /* BOTTOM */
+  .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .posts-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .posts-table th { text-align: left; font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 0 0 10px; border-bottom: 1px solid var(--border); }
+  .posts-table td { padding: 10px 0; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .posts-table tr:last-child td { border-bottom: none; }
+  .post-type { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .type-reel { background: #f3e5f5; color: #6a1b9a; }
+  .type-image { background: var(--blue-light); color: #1565c0; }
+  .type-video { background: #fce4ec; color: #c2185b; }
+  .type-carousel { background: #e8f5e9; color: #2e7d32; }
+  .eng-bar { height: 3px; background: #f0f0ec; border-radius: 2px; margin-top: 3px; overflow: hidden; }
+  .eng-fill { height: 100%; background: var(--blue); border-radius: 2px; }
+
+  /* AUDIENCE */
+  .aud-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .aud-label { font-size: 12px; color: var(--muted); width: 70px; flex-shrink: 0; }
+  .aud-bar-wrap { flex: 1; height: 5px; background: #f0f0ec; border-radius: 3px; overflow: hidden; }
+  .aud-bar { height: 100%; border-radius: 3px; }
+  .aud-val { font-size: 12px; font-weight: 500; width: 36px; text-align: right; font-family: 'Space Mono', monospace; }
+
+  /* MEDIA GRID */
+  .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .media-item { background: #f0f0ec; border-radius: 8px; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; cursor: pointer; border: 1px solid var(--border); transition: all 0.15s; overflow: hidden; position: relative; }
+  .media-item:hover { border-color: var(--blue); }
+  .media-item img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; border-radius: 8px; }
+  .media-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.55); padding: 6px 8px; border-radius: 0 0 8px 8px; display: flex; gap: 8px; font-size: 11px; color: #fff; }
+  .media-eng { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; }
+  .media-type-badge { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.6); color: #fff; font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+
+  /* LOADING */
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(245,245,240,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; display: none; }
+  .loading-spinner-big { width: 40px; height: 40px; border: 3px solid rgba(24,119,242,0.2); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+  .loading-text { font-size: 14px; color: var(--muted); }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; margin-top: 4px; }
+
+  @media (max-width: 768px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-row, .bottom-row { grid-template-columns: 1fr; }
+    .profile-stats { display: none; }
+    #dashboard { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner-big"></div>
+  <div class="loading-text" id="loadingText">Buscando dados da sua conta...</div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+      </div>
+      <span>MetaInsights</span>
+    </div>
+    <h1 class="login-title">Análise de perfil Meta</h1>
+    <p class="login-sub">Cole seu token de acesso da Graph API para conectar sua conta do Facebook e Instagram.</p>
+
+    <div class="tip">
+      Para gerar um token acesse <a href="https://developers.facebook.com/tools/explorer/" target="_blank">developers.facebook.com/tools/explorer</a> com as permissões: <strong>pages_show_list, pages_read_engagement, instagram_basic, instagram_manage_insights</strong>
+    </div>
+
+    <div class="field-label">Access Token</div>
+    <div class="token-row">
+      <input type="password" id="tokenInput" class="token-input" placeholder="EAAixNSRmauoB..." autocomplete="off" />
+      <button class="btn" onclick="toggleToken()" title="Mostrar/ocultar">👁</button>
+    </div>
+
+    <div class="status status-error" id="statusError">
+      <span id="errorMsg">Token inválido ou sem permissões suficientes.</span>
+    </div>
+    <div class="status status-loading" id="statusLoading">
+      <div class="spinner" style="border-top-color:#1877F2;border-color:rgba(24,119,242,0.2)"></div>
+      <span>Validando token...</span>
+    </div>
+
+    <div id="accountsSection" style="display:none;margin-bottom:16px">
+      <div class="field-label" style="margin-bottom:8px">Selecione a conta</div>
+      <div class="accounts-list" id="accountsList"></div>
+    </div>
+
+    <button class="btn btn-blue btn-full" id="connectBtn" onclick="handleConnect()">
+      Conectar minha conta
+    </button>
+
+    <div class="perms">
+      <div class="perm"><div class="perm-dot"></div>pages_read_engagement</div>
+      <div class="perm"><div class="perm-dot"></div>instagram_basic</div>
+      <div class="perm"><div class="perm-dot"></div>instagram_manage_insights</div>
+      <div class="perm"><div class="perm-dot"></div>pages_show_list</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="topbar-logo">
+    <div class="topbar-logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="width:14px;height:14px"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+    </div>
+    MetaInsights
+  </div>
+  <div class="topbar-right">
+    <div class="badge badge-green"><div class="dot-green"></div><span id="topbarAccount">Conectado</span></div>
+    <select id="periodSelect" onchange="changePeriod()" style="font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;">
+      <option value="7">Últimos 7 dias</option>
+      <option value="28" selected>Últimos 28 dias</option>
+      <option value="90">Últimos 90 dias</option>
+    </select>
+    <button class="btn" onclick="logout()">↩ Trocar conta</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="profile-av" id="profileAv">?</div>
+    <div class="profile-info">
+      <h2 id="profileName">—</h2>
+      <p id="profileHandle">—</p>
+      <div class="profile-tags" id="profileTags"></div>
+    </div>
+    <div class="profile-stats">
+      <div><div class="pstat-val" id="statFollowers">—</div><div class="pstat-lbl">seguidores</div></div>
+      <div><div class="pstat-val" id="statPosts">—</div><div class="pstat-lbl">publicações</div></div>
+      <div><div class="pstat-val" id="statEngRate">—</div><div class="pstat-lbl">eng. médio</div></div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Alcance</div>
+      <div class="kpi-value" id="kpiReach">—</div>
+      <div class="kpi-delta" id="kpiReachDelta"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Impressões</div>
+      <div class="kpi-value" id="kpiImpressions">—</div>
+      <div class="kpi-delta" id="kpiImpressionsDelta"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Engajamento total</div>
+      <div class="kpi-value" id="kpiEngagement">—</div>
+      <div class="kpi-delta" id="kpiEngagementDelta"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Novos seguidores</div>
+      <div class="kpi-value" id="kpiFollowerGrowth">—</div>
+      <div class="kpi-delta" id="kpiFollowerGrowthDelta"></div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Alcance ao longo do tempo</div>
+      <div class="chart-sub" id="chartSubTitle">Dados dos últimos 28 dias</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#1877F2"></div>Alcance</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#E91E8C"></div>Impressões</div>
+      </div>
+      <div style="position:relative;height:200px">
+        <canvas id="lineChart" role="img" aria-label="Gráfico de alcance e impressões ao longo do tempo"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Tipo de conteúdo</div>
+      <div class="chart-sub">Distribuição dos seus posts</div>
+      <div style="position:relative;height:160px;margin-bottom:12px">
+        <canvas id="doughnutChart" role="img" aria-label="Distribuição por tipo de conteúdo"></canvas>
+      </div>
+      <div id="doughnutLegend" style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted)"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Row -->
+  <div class="bottom-row">
+    <div class="chart-card">
+      <div class="chart-title">Top publicações</div>
+      <div class="chart-sub">Melhores posts por engajamento</div>
+      <table class="posts-table">
+        <thead>
+          <tr>
+            <th style="width:45%">Post</th>
+            <th>Tipo</th>
+            <th>Curtidas</th>
+            <th>Eng.</th>
+          </tr>
+        </thead>
+        <tbody id="postsTableBody">
+          <tr><td colspan="4" style="color:var(--muted);font-size:13px;padding:16px 0">Carregando posts...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Audiência</div>
+      <div class="chart-sub">Perfil dos seus seguidores</div>
+      <div id="audienceSection">
+        <div class="section-title" style="margin-top:0">Faixa etária</div>
+        <div id="ageSection"></div>
+        <div class="section-title">Gênero</div>
+        <div id="genderSection"></div>
+        <div class="section-title">Top localizações</div>
+        <div id="locationSection"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Media -->
+  <div class="chart-card" style="margin-bottom:20px">
+    <div class="chart-title" style="margin-bottom:4px">Publicações recentes</div>
+    <div class="chart-sub">Últimos posts do seu perfil</div>
+    <div class="media-grid" id="mediaGrid">
+      <div style="color:var(--muted);font-size:13px;grid-column:1/-1;padding:20px 0">Carregando publicações...</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:20px 0;font-size:12px;color:var(--muted)">
+    MetaInsights · Dados via Meta Graph API · Atualizado agora
+  </div>
+</div>
+
+<script>
+let TOKEN = '';
+let ACCOUNT_ID = '';
+let ACCOUNT_TYPE = '';
+let accountsData = [];
+let lineChartInstance = null;
+let doughnutInstance = null;
+
+function fmtNum(n) {
+  if (n === undefined || n === null || isNaN(n)) return '—';
+  n = parseInt(n);
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+  return n.toLocaleString('pt-BR');
+}
+
+function toggleToken() {
+  const i = document.getElementById('tokenInput');
+  i.type = i.type === 'password' ? 'text' : 'password';
+}
+
+function showStatus(id) {
+  document.getElementById('statusError').style.display = 'none';
+  document.getElementById('statusLoading').style.display = 'none';
+  if (id) document.getElementById(id).style.display = 'flex';
+}
+
+function setLoading(msg) {
+  const ol = document.getElementById('loadingOverlay');
+  if (msg) { ol.style.display = 'flex'; document.getElementById('loadingText').textContent = msg; }
+  else ol.style.display = 'none';
+}
+
+async function handleConnect() {
+  const token = document.getElementById('tokenInput').value.trim();
+  if (!token) return;
+
+  if (accountsData.length === 0) {
+    await fetchAccounts(token);
+  } else {
+    const selected = accountsData.find(a => a.selected);
+    if (!selected) { alert('Selecione uma conta.'); return; }
+    TOKEN = token;
+    ACCOUNT_ID = selected.id;
+    ACCOUNT_TYPE = selected.type;
+    await loadDashboard();
+  }
+}
+
+async function fetchAccounts(token) {
+  showStatus('statusLoading');
+  const btn = document.getElementById('connectBtn');
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`https://graph.facebook.com/v19.0/me?fields=id,name,accounts{id,name,category,fan_count,instagram_business_account{id,username,followers_count,media_count}}&access_token=${token}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    accountsData = [];
+    if (data.accounts && data.accounts.data) {
+      data.accounts.data.forEach(acc => {
+        accountsData.push({ id: acc.id, name: acc.name, type: 'facebook', label: 'Facebook Page', fans: acc.fan_count, color: '#1877F2', letter: acc.name[0].toUpperCase() });
+        if (acc.instagram_business_account) {
+          accountsData.push({ id: acc.instagram_business_account.id, name: '@' + (acc.instagram_business_account.username || acc.name), type: 'instagram', label: 'Instagram Business', fans: acc.instagram_business_account.followers_count, color: '#c2185b', letter: 'IG', username: acc.instagram_business_account.username });
+        }
+      });
+    }
+    if (accountsData.length === 0) {
+      accountsData.push({ id: data.id, name: data.name, type: 'user', label: 'Conta pessoal', fans: null, color: '#1877F2', letter: data.name[0].toUpperCase() });
+    }
+
+    renderAccountsList(token);
+    showStatus(null);
+    document.getElementById('connectBtn').textContent = 'Analisar conta selecionada';
+    document.getElementById('accountsSection').style.display = 'block';
+  } catch(e) {
+    document.getElementById('errorMsg').textContent = e.message || 'Erro ao validar token.';
+    showStatus('statusError');
+  }
+  btn.disabled = false;
+}
+
+function renderAccountsList(token) {
+  const list = document.getElementById('accountsList');
+  list.innerHTML = '';
+  accountsData.forEach((acc, i) => {
+    const div = document.createElement('div');
+    div.className = 'account-item';
+    div.innerHTML = `
+      <div class="acc-av" style="background:${acc.color}">${acc.letter}</div>
+      <div>
+        <div class="acc-name">${acc.name}</div>
+        <div class="acc-type">${acc.label}${acc.fans ? ' · ' + fmtNum(acc.fans) + ' seguidores' : ''}</div>
+      </div>
+      <span class="acc-check">✓</span>
+    `;
+    div.onclick = () => {
+      accountsData.forEach(a => a.selected = false);
+      acc.selected = true;
+      document.querySelectorAll('.account-item').forEach(el => el.classList.remove('selected'));
+      div.classList.add('selected');
+    };
+    list.appendChild(div);
+  });
+  if (accountsData.length > 0) { accountsData[0].selected = true; list.children[0].classList.add('selected'); }
+}
+
+async function loadDashboard() {
+  setLoading('Conectando à sua conta...');
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('topbar').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'block';
+
+  const acc = accountsData.find(a => a.id === ACCOUNT_ID);
+  document.getElementById('topbarAccount').textContent = acc ? acc.name : 'Conectado';
+
+  setLoading('Buscando perfil...');
+  await fetchProfile();
+  setLoading('Carregando insights...');
+  await fetchInsights();
+  setLoading('Buscando publicações...');
+  await fetchMedia();
+  setLoading('Carregando audiência...');
+  await fetchAudience();
+  setLoading(null);
+}
+
+async function fetchProfile() {
+  try {
+    let url, data;
+    if (ACCOUNT_TYPE === 'instagram') {
+      url = `https://graph.facebook.com/v19.0/${ACCOUNT_ID}?fields=id,username,name,biography,followers_count,media_count,website,profile_picture_url&access_token=${TOKEN}`;
+      const res = await fetch(url); data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      document.getElementById('profileAv').textContent = (data.username || 'IG')[0].toUpperCase();
+      document.getElementById('profileName').textContent = data.name || '@' + data.username;
+      document.getElementById('profileHandle').textContent = '@' + data.username + (data.biography ? ' · ' + data.biography.substring(0, 60) : '');
+      document.getElementById('statFollowers').textContent = fmtNum(data.followers_count);
+      document.getElementById('statPosts').textContent = fmtNum(data.media_count);
+      document.getElementById('statEngRate').textContent = '—';
+      document.getElementById('profileTags').innerHTML = '<span class="tag tag-blue">Instagram Business</span>';
+    } else {
+      url = `https://graph.facebook.com/v19.0/${ACCOUNT_ID}?fields=id,name,category,fan_count,posts.limit(1).summary(true)&access_token=${TOKEN}`;
+      const res = await fetch(url); data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      document.getElementById('profileAv').textContent = data.name[0].toUpperCase();
+      document.getElementById('profileName').textContent = data.name;
+      document.getElementById('profileHandle').textContent = data.category || 'Página do Facebook';
+      document.getElementById('statFollowers').textContent = fmtNum(data.fan_count);
+      document.getElementById('statPosts').textContent = data.posts && data.posts.summary ? fmtNum(data.posts.summary.total_count) : '—';
+      document.getElementById('statEngRate').textContent = '—';
+      document.getElementById('profileTags').innerHTML = '<span class="tag tag-blue">Facebook Page</span>' + (data.category ? `<span class="tag tag-gray">${data.category}</span>` : '');
+    }
+  } catch(e) { console.error('Profile error:', e); }
+}
+
+async function fetchInsights() {
+  try {
+    const period = document.getElementById('periodSelect').value;
+    document.getElementById('chartSubTitle').textContent = `Dados dos últimos ${period} dias`;
+    let metric, sinceTs = Math.floor((Date.now() - period * 86400000) / 1000);
+
+    if (ACCOUNT_TYPE === 'instagram') {
+      const url = `https://graph.facebook.com/v19.0/${ACCOUNT_ID}/insights?metric=reach,impressions,follower_count,profile_views&period=day&since=${sinceTs}&access_token=${TOKEN}`;
+      const res = await fetch(url); const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+
+      let reachVals = [], impressionVals = [], labels = [], reachTotal = 0, impressionsTotal = 0, followerGrowth = 0;
+      data.data.forEach(m => {
+        if (m.name === 'reach') { m.values.forEach(v => { reachVals.push(v.value); reachTotal += v.value; labels.push(new Date(v.end_time).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'})); }); }
+        if (m.name === 'impressions') { m.values.forEach(v => { impressionVals.push(v.value); impressionsTotal += v.value; }); }
+        if (m.name === 'follower_count') { const vals = m.values; if (vals.length >= 2) followerGrowth = vals[vals.length-1].value - vals[0].value; }
+      });
+
+      document.getElementById('kpiReach').textContent = fmtNum(reachTotal);
+      document.getElementById('kpiImpressions').textContent = fmtNum(impressionsTotal);
+      document.getElementById('kpiFollowerGrowth').textContent = (followerGrowth >= 0 ? '+' : '') + fmtNum(followerGrowth);
+      document.getElementById('kpiEngagement').textContent = '—';
+      renderLineChart(labels, reachVals, impressionVals);
+    } else {
+      const url = `https://graph.facebook.com/v19.0/${ACCOUNT_ID}/insights?metric=page_impressions,page_reach,page_follows&period=day&since=${sinceTs}&access_token=${TOKEN}`;
+      const res = await fetch(url); const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+
+      let reachVals = [], impressionVals = [], labels = [], reachTotal = 0, impressionsTotal = 0, followerGrowth = 0;
+      data.data.forEach(m => {
+        if (m.name === 'page_reach') { m.values.forEach(v => { reachVals.push(v.value); reachTotal += v.value; labels.push(new Date(v.end_time).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'})); }); }
+        if (m.name === 'page_impressions') { m.values.forEach(v => { impressionVals.push(v.value); impressionsTotal += v.value; }); }
+        if (m.name === 'page_follows') { m.values.forEach(v => { followerGrowth += v.value; }); }
+      });
+
+      document.getElementById('kpiReach').textContent = fmtNum(reachTotal);
+      document.getElementById('kpiImpressions').textContent = fmtNum(impressionsTotal);
+      document.getElementById('kpiFollowerGrowth').textContent = '+' + fmtNum(followerGrowth);
+      document.getElementById('kpiEngagement').textContent = '—';
+      renderLineChart(labels, reachVals, impressionVals);
+    }
+  } catch(e) { console.error('Insights error:', e); }
+}
+
+function renderLineChart(labels, reach, impressions) {
+  if (lineChartInstance) lineChartInstance.destroy();
+  lineChartInstance = new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: 'Alcance', data: reach, borderColor: '#1877F2', backgroundColor: 'rgba(24,119,242,0.07)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, borderDash: [] },
+      { label: 'Impressões', data: impressions, borderColor: '#E91E8C', backgroundColor: 'rgba(233,30,140,0.07)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, borderDash: [4,3] }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: c => ' ' + c.dataset.label + ': ' + c.parsed.y.toLocaleString('pt-BR') } } }, scales: { x: { ticks: { font: { size: 10 }, color: '#999', maxTicksLimit: 10, autoSkip: true }, grid: { display: false }, border: { display: false } }, y: { ticks: { font: { size: 10 }, color: '#999', callback: v => v >= 1000 ? (v/1000).toFixed(1)+'K' : v }, grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false } } } }
+  });
+}
+
+async function fetchMedia() {
+  try {
+    let url, data;
+    if (ACCOUNT_TYPE === 'instagram') {
+      url = `https://graph.facebook.com/v19.0/${ACCOUNT_ID}/media?fields=id,caption,media_type,thumbnail_url,media_url,timestamp,like_count,comments_count,permalink&limit=9&access_token=${TOKEN}`;
+    } else {
+      url = `https://graph.facebook.com/v19.0/${ACCOUNT_ID}/posts?fields=id,message,story,created_time,attachments{type,media_type},reactions.summary(true),comments.summary(true),shares&limit=9&access_token=${TOKEN}`;
+    }
+    const res = await fetch(url); data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    renderMedia(data.data);
+    renderPostsTable(data.data);
+
+    // Doughnut chart
+    const typeCounts = {};
+    data.data.forEach(p => {
+      const t = ACCOUNT_TYPE === 'instagram' ? p.media_type : (p.attachments && p.attachments.data[0] ? p.attachments.data[0].media_type || p.attachments.data[0].type : 'TEXT');
+      typeCounts[t] = (typeCounts[t] || 0) + 1;
+    });
+    renderDoughnut(typeCounts);
+  } catch(e) { console.error('Media error:', e); }
+}
+
+function renderMedia(posts) {
+  const grid = document.getElementById('mediaGrid');
+  grid.innerHTML = '';
+  if (!posts || posts.length === 0) { grid.innerHTML = '<div style="color:var(--muted);font-size:13px;grid-column:1/-1;padding:20px 0">Nenhuma publicação encontrada.</div>'; return; }
+  posts.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'media-item';
+    const likes = p.like_count || (p.reactions && p.reactions.summary && p.reactions.summary.total_count) || 0;
+    const comments = p.comments_count || (p.comments && p.comments.summary && p.comments.summary.total_count) || 0;
+    const type = p.media_type || 'POST';
+    const imgUrl = p.media_url || p.thumbnail_url || '';
+    const link = p.permalink || '';
+
+    div.innerHTML = imgUrl ? `
+      <img src="${imgUrl}" alt="post" onerror="this.style.display='none'" />
+      <div class="media-type-badge">${type}</div>
+      <div class="media-overlay">
+        <span>♥ ${fmtNum(likes)}</span>
+        <span>💬 ${fmtNum(comments)}</span>
+      </div>` : `
+      <div style="font-size:11px;color:var(--muted);text-align:center;padding:8px;z-index:1">${(p.caption || p.message || p.story || 'Post').substring(0,60)}...</div>
+      <div style="position:absolute;bottom:6px;font-size:11px;color:var(--muted)">♥ ${fmtNum(likes)}</div>`;
+
+    if (link) div.onclick = () => window.open(link, '_blank');
+    grid.appendChild(div);
+  });
+}
+
+function renderPostsTable(posts) {
+  const tbody = document.getElementById('postsTableBody');
+  tbody.innerHTML = '';
+  if (!posts || posts.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:16px 0">Nenhum post encontrado.</td></tr>'; return; }
+  const top = posts.slice(0, 5).sort((a,b) => {
+    const la = a.like_count || (a.reactions && a.reactions.summary && a.reactions.summary.total_count) || 0;
+    const lb = b.like_count || (b.reactions && b.reactions.summary && b.reactions.summary.total_count) || 0;
+    return lb - la;
+  });
+  const maxLikes = top[0] ? (top[0].like_count || (top[0].reactions && top[0].reactions.summary && top[0].reactions.summary.total_count) || 1) : 1;
+  top.forEach(p => {
+    const likes = p.like_count || (p.reactions && p.reactions.summary && p.reactions.summary.total_count) || 0;
+    const type = p.media_type || 'POST';
+    const caption = (p.caption || p.message || p.story || '(sem legenda)').substring(0, 40);
+    const typeClass = type === 'VIDEO' || type === 'REEL' ? 'type-reel' : type === 'CAROUSEL_ALBUM' ? 'type-carousel' : 'type-image';
+    const pct = Math.round((likes / maxLikes) * 100);
+    const date = new Date(p.timestamp || p.created_time);
+    const dateStr = date.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="max-width:160px"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${caption}</div><div style="font-size:10px;color:var(--muted)">${dateStr}</div></td>
+      <td><span class="post-type ${typeClass}">${type}</span></td>
+      <td><span style="font-family:'Space Mono',monospace;font-size:12px">${fmtNum(likes)}</span><div class="eng-bar"><div class="eng-fill" style="width:${pct}%"></div></div></td>
+      <td><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--blue)">${likes > 0 ? (likes/100).toFixed(1)+'%' : '—'}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderDoughnut(typeCounts) {
+  const labels = Object.keys(typeCounts);
+  const values = Object.values(typeCounts);
+  const colors = ['#6a1b9a','#1877F2','#E91E8C','#ff9800','#2e7d32','#c62828'];
+  const total = values.reduce((a,b) => a+b, 0);
+
+  if (doughnutInstance) doughnutInstance.destroy();
+  doughnutInstance = new Chart(document.getElementById('doughnutChart'), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors.slice(0, labels.length), borderWidth: 0, hoverOffset: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.label + ': ' + c.parsed + ' posts' } } }, cutout: '68%' }
+  });
+
+  const legend = document.getElementById('doughnutLegend');
+  legend.innerHTML = labels.map((l, i) => `<span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:${colors[i]};flex-shrink:0"></span>${l} · ${Math.round(values[i]/total*100)}%</span>`).join('');
+}
+
+async function fetchAudience() {
+  try {
+    if (ACCOUNT_TYPE !== 'instagram') {
+      document.getElementById('audienceSection').innerHTML = '<div style="color:var(--muted);font-size:13px">Dados de audiência disponíveis para contas Instagram Business.</div>';
+      return;
+    }
+    const url = `https://graph.facebook.com/v19.0/${ACCOUNT_ID}/insights?metric=audience_gender_age,audience_city,audience_country&period=lifetime&access_token=${TOKEN}`;
+    const res = await fetch(url); const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    data.data.forEach(m => {
+      if (m.name === 'audience_gender_age') {
+        const latest = m.values[m.values.length - 1].value;
+        const ageGroups = {}, genders = { M: 0, F: 0, U: 0 };
+        let total = 0;
+        Object.entries(latest).forEach(([key, val]) => {
+          const [gender, age] = key.split('.');
+          ageGroups[age] = (ageGroups[age] || 0) + val;
+          genders[gender] = (genders[gender] || 0) + val;
+          total += val;
+        });
+        const ageEl = document.getElementById('ageSection');
+        ageEl.innerHTML = Object.entries(ageGroups).sort().map(([age, val]) => {
+          const pct = Math.round(val / total * 100);
+          return `<div class="aud-item"><span class="aud-label">${age}</span><div class="aud-bar-wrap"><div class="aud-bar" style="width:${pct}%;background:#1877F2"></div></div><span class="aud-val">${pct}%</span></div>`;
+        }).join('');
+        const genderEl = document.getElementById('genderSection');
+        const gTotal = genders.M + genders.F + genders.U;
+        const gLabels = { M: 'Masculino', F: 'Feminino', U: 'Outro' };
+        const gColors = { M: '#1877F2', F: '#E91E8C', U: '#888' };
+        genderEl.innerHTML = Object.entries(genders).filter(([,v]) => v > 0).sort((a,b) => b[1]-a[1]).map(([g, val]) => {
+          const pct = Math.round(val / gTotal * 100);
+          return `<div class="aud-item"><span class="aud-label">${gLabels[g]}</span><div class="aud-bar-wrap"><div class="aud-bar" style="width:${pct}%;background:${gColors[g]}"></div></div><span class="aud-val">${pct}%</span></div>`;
+        }).join('');
+      }
+      if (m.name === 'audience_city') {
+        const latest = m.values[m.values.length - 1].value;
+        const sorted = Object.entries(latest).sort((a,b) => b[1]-a[1]).slice(0, 5);
+        const total = sorted.reduce((sum, [,v]) => sum + v, 0);
+        document.getElementById('locationSection').innerHTML = sorted.map(([city, val]) => {
+          const pct = Math.round(val / total * 100);
+          return `<div class="aud-item"><span class="aud-label" style="width:100px;font-size:11px">${city.split(',')[0]}</span><div class="aud-bar-wrap"><div class="aud-bar" style="width:${pct}%;background:#1D9E75"></div></div><span class="aud-val">${pct}%</span></div>`;
+        }).join('');
+      }
+    });
+  } catch(e) {
+    document.getElementById('audienceSection').innerHTML = '<div style="color:var(--muted);font-size:13px">Dados de audiência não disponíveis (verifique permissões).</div>';
+  }
+}
+
+async function changePeriod() {
+  setLoading('Atualizando período...');
+  await fetchInsights();
+  setLoading(null);
+}
+
+function logout() {
+  TOKEN = ''; ACCOUNT_ID = ''; ACCOUNT_TYPE = '';
+  accountsData = [];
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('tokenInput').value = '';
+  document.getElementById('accountsSection').style.display = 'none';
+  document.getElementById('connectBtn').textContent = 'Conectar minha conta';
+  showStatus(null);
+}
+</script>
+</body>
+</html>
