@@ -4,602 +4,852 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MetaInsights — Análise de Perfil</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root {
-    --blue: #1877F2; --blue-light: #e3f0fd; --pink: #E91E8C;
-    --bg: #f5f5f0; --card: #ffffff; --border: rgba(0,0,0,0.08);
-    --text: #1a1a1a; --muted: #6b6b6b;
-    --success: #2e7d32; --success-bg: #e8f5e9;
-    --danger: #c62828; --danger-bg: #ffebee;
-    --radius: 12px; --radius-sm: 8px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+:root {
+  --blue:#1877F2;--blue-l:#e3f0fd;--pink:#E91E8C;--purple:#6a1b9a;
+  --bg:#f4f4f0;--card:#fff;--border:rgba(0,0,0,0.07);
+  --text:#181818;--muted:#6b6b6b;--hint:#aaa;
+  --green:#1D9E75;--green-l:#e1f5ee;
+  --orange:#f57c00;--orange-l:#fff3e0;
+  --r:12px;--rs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-  #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-  .login-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 40px; max-width: 520px; width: 100%; }
-  .login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
-  .login-logo-mark { width: 36px; height: 36px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-  .login-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
-  .login-sub { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
-  .field-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
-  .token-row { display: flex; gap: 8px; margin-bottom: 14px; }
-  .token-input { flex: 1; font-family: 'Space Mono', monospace; font-size: 12px; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fafafa; color: var(--text); outline: none; transition: border 0.2s; }
-  .token-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(24,119,242,0.1); }
-  .proxy-input { width: 100%; font-size: 12px; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fafafa; color: var(--text); outline: none; margin-bottom: 14px; transition: border 0.2s; }
-  .proxy-input:focus { border-color: var(--blue); }
-  .btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 10px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; white-space: nowrap; }
-  .btn:hover { background: #f0f0ec; }
-  .btn-blue { background: var(--blue); color: #fff; border-color: var(--blue); }
-  .btn-blue:hover { background: #1566d6; }
-  .btn-blue:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-full { width: 100%; justify-content: center; padding: 12px; font-size: 14px; }
-  .status { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; display: none; align-items: center; gap: 8px; margin-bottom: 12px; }
-  .status-error { background: var(--danger-bg); color: var(--danger); border: 1px solid #ffcdd2; }
-  .status-loading { background: var(--blue-light); color: #0C447C; border: 1px solid #b5d4f4; }
-  .status-success { background: var(--success-bg); color: var(--success); border: 1px solid #a5d6a7; }
-  .perms { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
-  .perm { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
-  .perm-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
-  .tip { background: #fff8e1; border: 1px solid #ffe082; border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12px; color: #5d4037; margin-bottom: 14px; line-height: 1.6; }
-  .tip a { color: var(--blue); }
-  .proxy-box { background: #f0f7ff; border: 1px solid #b5d4f4; border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 16px; font-size: 12px; color: #0C447C; line-height: 1.6; }
-  .proxy-box strong { display: block; margin-bottom: 4px; font-size: 13px; }
-  .proxy-box a { color: var(--blue); font-weight: 500; }
-  .divider { height: 1px; background: var(--border); margin: 16px 0; }
-  .accounts-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-  .account-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; }
-  .account-item:hover { border-color: var(--blue); background: var(--blue-light); }
-  .account-item.selected { border-color: var(--blue); background: var(--blue-light); }
-  .acc-av { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
-  .acc-name { font-size: 14px; font-weight: 500; }
-  .acc-type { font-size: 12px; color: var(--muted); }
-  .acc-check { margin-left: auto; color: var(--blue); font-size: 18px; display: none; }
-  .account-item.selected .acc-check { display: block; }
+/* LOGIN */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.lcard{background:var(--card);border-radius:16px;border:1px solid var(--border);padding:36px;max-width:500px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,0.06);}
+.llogo{display:flex;align-items:center;gap:10px;margin-bottom:24px;}
+.lmark{width:34px;height:34px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.ltitle{font-size:20px;font-weight:600;margin-bottom:5px;}
+.lsub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+.flabel{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;}
+.finput{width:100%;font-size:12px;padding:10px 13px;border:1px solid var(--border);border-radius:var(--rs);background:#fafafa;color:var(--text);outline:none;margin-bottom:12px;transition:border .2s;}
+.finput:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,119,242,.1);}
+.trow{display:flex;gap:7px;margin-bottom:12px;}
+.trow .finput{margin-bottom:0;}
+.btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:9px 15px;border-radius:var(--rs);border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;white-space:nowrap;}
+.btn:hover{background:#f0f0ec;}
+.btn-blue{background:var(--blue);color:#fff;border-color:var(--blue);}
+.btn-blue:hover{background:#1566d6;}
+.btn-blue:disabled{opacity:.5;cursor:not-allowed;}
+.btn-full{width:100%;justify-content:center;padding:11px;font-size:14px;}
+.st{padding:10px 13px;border-radius:var(--rs);font-size:12px;display:none;align-items:center;gap:8px;margin-bottom:10px;}
+.st-e{background:#ffebee;color:#c62828;border:1px solid #ffcdd2;}
+.st-l{background:var(--blue-l);color:#0C447C;border:1px solid #b5d4f4;}
+.st-s{background:var(--green-l);color:#0F6E56;border:1px solid #9FE1CB;}
+.tip{background:var(--orange-l);border:1px solid #ffcc80;border-radius:var(--rs);padding:10px 13px;font-size:12px;color:#5d4037;margin-bottom:14px;line-height:1.6;}
+.tip a{color:var(--blue);}
+.proxy-box{background:var(--blue-l);border:1px solid #b5d4f4;border-radius:var(--rs);padding:12px 13px;margin-bottom:14px;font-size:12px;color:#0C447C;line-height:1.6;}
+.proxy-box strong{display:block;margin-bottom:3px;font-size:13px;}
+.proxy-box a{color:var(--blue);font-weight:500;}
+.accs{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;}
+.acc-item{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;transition:all .15s;}
+.acc-item:hover,.acc-item.sel{border-color:var(--blue);background:var(--blue-l);}
+.acc-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.acc-n{font-size:13px;font-weight:500;}
+.acc-t{font-size:11px;color:var(--muted);}
+.acc-ck{margin-left:auto;color:var(--blue);font-size:16px;display:none;}
+.acc-item.sel .acc-ck{display:block;}
 
-  #topbar { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 24px; height: 54px; display: none; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-  .topbar-logo { display: flex; align-items: center; gap: 8px; font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; }
-  .topbar-logo-mark { width: 28px; height: 28px; background: var(--blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
-  .topbar-right { display: flex; align-items: center; gap: 10px; }
-  .badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; }
-  .badge-green { background: var(--success-bg); color: var(--success); }
-  .dot-green { width: 6px; height: 6px; border-radius: 50%; background: #43a047; }
+/* TOPBAR */
+#topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 22px;height:52px;display:none;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.tlogo{display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;}
+.tmark{width:26px;height:26px;background:var(--blue);border-radius:5px;display:flex;align-items:center;justify-content:center;}
+.tbadge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;background:var(--green-l);color:#0F6E56;}
+.tdot{width:6px;height:6px;border-radius:50%;background:#43a047;}
+.tsel{font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 9px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;}
 
-  #dashboard { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; }
-  .profile-header { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
-  .profile-av { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff; background: var(--blue); flex-shrink: 0; }
-  .profile-info h2 { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
-  .profile-info p { font-size: 13px; color: var(--muted); max-width: 400px; }
-  .profile-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-  .tag { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 4px; }
-  .tag-blue { background: var(--blue-light); color: var(--blue); }
-  .tag-gray { background: #f0f0ec; color: var(--muted); border: 1px solid var(--border); }
-  .profile-stats { margin-left: auto; display: flex; gap: 28px; text-align: right; }
-  .pstat-val { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; }
-  .pstat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
-  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
-  .kpi-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-  .kpi-value { font-family: 'Space Mono', monospace; font-size: 24px; font-weight: 700; margin-bottom: 4px; }
-  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
-  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
-  .chart-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-  .chart-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
-  .legend { display: flex; gap: 16px; margin-bottom: 12px; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
-  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
-  .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-  .posts-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .posts-table th { text-align: left; font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 0 0 10px; border-bottom: 1px solid var(--border); }
-  .posts-table td { padding: 10px 0; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  .posts-table tr:last-child td { border-bottom: none; }
-  .post-type { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-  .type-reel { background: #f3e5f5; color: #6a1b9a; }
-  .type-image { background: var(--blue-light); color: #1565c0; }
-  .type-video { background: #fce4ec; color: #c2185b; }
-  .type-carousel { background: #e8f5e9; color: #2e7d32; }
-  .eng-bar { height: 3px; background: #f0f0ec; border-radius: 2px; margin-top: 3px; overflow: hidden; }
-  .eng-fill { height: 100%; background: var(--blue); border-radius: 2px; }
-  .aud-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .aud-label { font-size: 12px; color: var(--muted); width: 80px; flex-shrink: 0; }
-  .aud-bar-wrap { flex: 1; height: 5px; background: #f0f0ec; border-radius: 3px; overflow: hidden; }
-  .aud-bar { height: 100%; border-radius: 3px; }
-  .aud-val { font-size: 12px; font-weight: 500; width: 36px; text-align: right; font-family: 'Space Mono', monospace; }
-  .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .media-item { background: #f0f0ec; border-radius: 8px; aspect-ratio: 1; cursor: pointer; border: 1px solid var(--border); transition: all 0.15s; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
-  .media-item:hover { border-color: var(--blue); transform: scale(1.01); }
-  .media-item img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
-  .media-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.55); padding: 6px 8px; display: flex; gap: 8px; font-size: 11px; color: #fff; }
-  .media-type-badge { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.6); color: #fff; font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
-  .section-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 12px 0 8px; }
-  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
-  .spinner-blue { border-color: rgba(24,119,242,0.2); border-top-color: var(--blue); }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-overlay { position: fixed; inset: 0; background: rgba(245,245,240,0.92); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999; }
-  .loading-big { width: 40px; height: 40px; border: 3px solid rgba(24,119,242,0.15); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
-  .loading-text { font-size: 14px; color: var(--muted); }
-  @media (max-width: 768px) {
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .charts-row, .bottom-row { grid-template-columns: 1fr; }
-    .profile-stats { display: none; }
-    #dashboard { padding: 12px; }
-    .login-card { padding: 24px; }
-  }
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--bg);border-bottom:1px solid var(--border);padding:0 22px;position:sticky;top:52px;z-index:99;}
+.tab{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:12px 16px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+.tab:hover{color:var(--text);}
+
+/* DASHBOARD */
+#dashboard{display:none;}
+.pane{display:none;padding:20px 22px;max-width:1200px;margin:0 auto;}
+.pane.active{display:block;}
+
+/* PROFILE CARD */
+.profile-hdr{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;display:flex;align-items:center;gap:16px;margin-bottom:18px;}
+.p-av{width:52px;height:52px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0;}
+.p-info h2{font-size:15px;font-weight:600;margin-bottom:2px;}
+.p-info p{font-size:12px;color:var(--muted);max-width:360px;line-height:1.4;}
+.p-tags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;}
+.ptag{font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;}
+.ptag-b{background:var(--blue-l);color:var(--blue);}
+.ptag-g{background:#f0f0ec;color:var(--muted);border:1px solid var(--border);}
+.p-stats{margin-left:auto;display:flex;gap:24px;text-align:right;}
+.psv{font-family:'Space Mono',monospace;font-size:19px;font-weight:700;}
+.psl{font-size:11px;color:var(--muted);margin-top:1px;}
+
+/* GRIDS */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px;}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:18px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;}
+.card-title{font-size:13px;font-weight:600;margin-bottom:3px;}
+.card-sub{font-size:11px;color:var(--muted);margin-bottom:14px;}
+
+/* KPI */
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+.kpi-l{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;}
+.kpi-v{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;margin-bottom:3px;}
+.kpi-d{font-size:11px;font-weight:500;}
+.d-pos{color:#1D9E75;} .d-neg{color:#c62828;}
+
+/* POSTS TABLE */
+.ptbl{width:100%;border-collapse:collapse;font-size:12px;}
+.ptbl th{text-align:left;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:0 0 9px;border-bottom:1px solid var(--border);}
+.ptbl td{padding:9px 0;border-bottom:1px solid var(--border);vertical-align:middle;}
+.ptbl tr:last-child td{border-bottom:none;}
+.ptype{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;}
+.pt-r{background:#f3e5f5;color:#6a1b9a;} .pt-i{background:var(--blue-l);color:#1565c0;}
+.pt-v{background:#fce4ec;color:#c2185b;} .pt-c{background:var(--green-l);color:#0F6E56;}
+.ebar{height:3px;background:#f0f0ec;border-radius:2px;margin-top:3px;overflow:hidden;}
+.efill{height:100%;background:var(--blue);border-radius:2px;}
+
+/* MEDIA GRID */
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.mitem{border-radius:8px;aspect-ratio:1;cursor:pointer;border:1px solid var(--border);overflow:hidden;position:relative;background:#f0f0ec;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.mitem:hover{border-color:var(--blue);transform:scale(1.02);}
+.mitem img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.mov{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);padding:5px 7px;display:flex;gap:7px;font-size:10px;color:#fff;}
+.mbadge{position:absolute;top:5px;right:5px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;font-weight:600;padding:2px 5px;border-radius:3px;}
+.mcap{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);padding:6px 8px;font-size:10px;color:#fff;line-height:1.3;display:none;}
+.mitem:hover .mcap{display:block;}
+
+/* HASHTAGS */
+.hashtag-cloud{display:flex;flex-wrap:wrap;gap:7px;}
+.htag{font-size:12px;font-weight:500;padding:4px 10px;border-radius:20px;cursor:pointer;transition:all .15s;}
+.htag:hover{transform:scale(1.05);}
+
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-header{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px;}
+.cal-day-lbl{font-size:10px;font-weight:600;color:var(--muted);text-align:center;padding:3px 0;}
+.cal-day{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:var(--muted);cursor:default;position:relative;}
+.cal-day.has-post{background:var(--blue-l);color:var(--blue);font-weight:700;cursor:pointer;}
+.cal-day.has-post:hover{background:var(--blue);color:#fff;}
+.cal-day.today{border:1.5px solid var(--blue);}
+.cal-day.empty{opacity:0;}
+
+/* HEATMAP */
+.heat-grid{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;margin-bottom:6px;}
+.heat-cell{height:28px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;}
+.heat-labels{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;}
+.heat-lbl{font-size:9px;color:var(--muted);text-align:center;}
+.day-labels{display:flex;flex-direction:column;gap:2px;margin-right:6px;}
+.day-lbl{height:28px;display:flex;align-items:center;font-size:10px;color:var(--muted);white-space:nowrap;}
+
+/* AUDIENCE BARS */
+.aud-item{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+.aud-l{font-size:12px;color:var(--muted);width:75px;flex-shrink:0;}
+.aud-bw{flex:1;height:5px;background:#f0f0ec;border-radius:3px;overflow:hidden;}
+.aud-b{height:100%;border-radius:3px;}
+.aud-v{font-size:12px;font-weight:500;width:34px;text-align:right;font-family:'Space Mono',monospace;}
+
+/* MISC */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+.spin-b{border-color:rgba(24,119,242,.2);border-top-color:var(--blue);}
+@keyframes spin{to{transform:rotate(360deg);}}
+.lov{position:fixed;inset:0;background:rgba(244,244,240,.92);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:999;}
+.lbig{width:38px;height:38px;border:3px solid rgba(24,119,242,.15);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:14px;}
+.ltxt{font-size:13px;color:var(--muted);}
+.sec-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 7px;}
+.empty-state{text-align:center;padding:28px 0;color:var(--muted);font-size:13px;}
+.legend{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+.leg-dot{width:8px;height:8px;border-radius:2px;}
+.score-ring{position:relative;width:90px;height:90px;margin:0 auto 10px;}
+.score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:20px;font-weight:700;}
+.insight-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.insight-item:last-child{border-bottom:none;}
+.insight-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.insight-text{font-size:13px;line-height:1.5;}
+.insight-text strong{font-weight:600;}
+
+@media(max-width:768px){
+  .g4{grid-template-columns:repeat(2,1fr);}
+  .g21,.g2,.g3{grid-template-columns:1fr;}
+  .mgrid{grid-template-columns:repeat(3,1fr);}
+  .p-stats{display:none;}
+  .pane{padding:14px;}
+  .tabs{overflow-x:auto;}
+}
 </style>
 </head>
 <body>
 
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-big"></div>
-  <div class="loading-text" id="loadingText">Carregando...</div>
-</div>
+<div class="lov" id="lov"><div class="lbig"></div><div class="ltxt" id="ltxt">Carregando...</div></div>
 
 <!-- LOGIN -->
 <div id="loginScreen">
-  <div class="login-card">
-    <div class="login-logo">
-      <div class="login-logo-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="width:18px;height:18px"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-      </div>
-      <span style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700">MetaInsights</span>
+  <div class="lcard">
+    <div class="llogo">
+      <div class="lmark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="width:16px;height:16px"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></div>
+      <span style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700">MetaInsights</span>
     </div>
-    <h1 class="login-title">Análise de perfil Meta</h1>
-    <p class="login-sub">Cole seu token de acesso da Graph API para visualizar os dados reais da sua conta.</p>
-
+    <h1 class="ltitle">Análise de perfil Meta</h1>
+    <p class="lsub">Conecte sua conta do Instagram para ver análises detalhadas de posts, hashtags, melhores horários e muito mais.</p>
     <div class="proxy-box">
-      <strong>🔗 URL do seu proxy (Cloudflare Worker)</strong>
-      Cole abaixo a URL do Worker que você criou. Exemplo:<br>
-      <code>https://meta-proxy.SEU-USUARIO.workers.dev</code><br><br>
-      <a href="https://workers.cloudflare.com" target="_blank">Ainda não criou? Clique aqui para criar gratuitamente →</a>
+      <strong>🔗 URL do proxy (Cloudflare Worker)</strong>
+      Exemplo: <code>https://round-block-af15osvaldo-alves077workersdev.osvaldo-alves077.workers.dev</code>
     </div>
-
-    <div class="field-label">URL do proxy (Cloudflare Worker)</div>
-    <input type="text" id="proxyInput" class="proxy-input" placeholder="https://meta-proxy.seu-usuario.workers.dev" />
-
-    <div class="tip">
-      Token gerado em <a href="https://developers.facebook.com/tools/explorer/" target="_blank">developers.facebook.com/tools/explorer</a> com permissões: <strong>pages_show_list, pages_read_engagement, instagram_basic, instagram_manage_insights</strong>
+    <div class="flabel">URL do proxy</div>
+    <input type="text" id="proxyInput" class="finput" placeholder="https://seu-worker.workers.dev" />
+    <div class="tip">Token em <a href="https://developers.facebook.com/tools/explorer/" target="_blank">developers.facebook.com/tools/explorer</a> · Permissões: pages_show_list, instagram_basic, instagram_manage_insights</div>
+    <div class="flabel">Access Token</div>
+    <div class="trow">
+      <input type="password" id="tokenInput" class="finput" placeholder="EAAixNSRmauoB..." autocomplete="off" />
+      <button class="btn" onclick="toggleTok()">👁</button>
     </div>
-
-    <div class="field-label">Access Token</div>
-    <div class="token-row">
-      <input type="password" id="tokenInput" class="token-input" placeholder="EAAixNSRmauoB..." autocomplete="off" />
-      <button class="btn" onclick="toggleToken()" title="Mostrar/ocultar">👁</button>
+    <div class="flabel">ID do Instagram (se não aparecer na lista)</div>
+    <input type="text" id="manualId" class="finput" placeholder="Ex: 17841402179937362" />
+    <div class="st st-e" id="stE"><span id="stEm"></span></div>
+    <div class="st st-l" id="stL"><div class="spin spin-b"></div><span id="stLm">Validando...</span></div>
+    <div class="st st-s" id="stS"><span id="stSm"></span></div>
+    <div id="accsSection" style="display:none;margin-bottom:14px">
+      <div class="flabel" style="margin-bottom:7px">Selecione a conta</div>
+      <div class="accs" id="accsList"></div>
     </div>
-
-    <div class="status status-error" id="statusError"><span id="errorMsg"></span></div>
-    <div class="status status-loading" id="statusLoading">
-      <div class="spinner spinner-blue"></div>
-      <span id="loadingMsg">Validando token...</span>
-    </div>
-    <div class="status status-success" id="statusSuccess"><span id="successMsg"></span></div>
-
-    <div id="accountsSection" style="display:none;margin-bottom:16px">
-      <div class="field-label" style="margin-bottom:8px">Selecione a conta para analisar</div>
-      <div class="accounts-list" id="accountsList"></div>
-    </div>
-
-    <div id="manualSection" style="margin-bottom:16px">
-      <div class="field-label" style="margin-bottom:6px">ID do Instagram (opcional)</div>
-      <input type="text" id="manualIgId" class="proxy-input" placeholder="Ex: 17841402179937362 — deixe vazio para detectar automaticamente" />
-      <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:8px">Se sua conta não aparecer na lista, cole o ID do Instagram aqui. Tipo: <strong>instagram</strong></div>
-    </div>
-
-    <button class="btn btn-blue btn-full" id="connectBtn" onclick="handleConnect()">
-      Conectar minha conta
-    </button>
-
-    <div class="perms">
-      <div class="perm"><div class="perm-dot"></div>pages_read_engagement</div>
-      <div class="perm"><div class="perm-dot"></div>instagram_basic</div>
-      <div class="perm"><div class="perm-dot"></div>instagram_manage_insights</div>
-      <div class="perm"><div class="perm-dot"></div>pages_show_list</div>
+    <button class="btn btn-blue btn-full" id="connBtn" onclick="handleConnect()">Conectar minha conta</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:5px;height:5px;border-radius:50%;background:#43a047"></div>instagram_basic</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:5px;height:5px;border-radius:50%;background:#43a047"></div>instagram_manage_insights</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:5px;height:5px;border-radius:50%;background:#43a047"></div>pages_show_list</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><div style="width:5px;height:5px;border-radius:50%;background:#43a047"></div>pages_read_engagement</div>
     </div>
   </div>
 </div>
 
 <!-- TOPBAR -->
 <div id="topbar">
-  <div class="topbar-logo">
-    <div class="topbar-logo-mark">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="width:14px;height:14px"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-    </div>
+  <div class="tlogo">
+    <div class="tmark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="width:13px;height:13px"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></div>
     MetaInsights
   </div>
-  <div class="topbar-right">
-    <div class="badge badge-green"><div class="dot-green"></div><span id="topbarAccount">Conectado</span></div>
-    <select id="periodSelect" onchange="changePeriod()" style="font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer">
-      <option value="7">Últimos 7 dias</option>
-      <option value="28" selected>Últimos 28 dias</option>
-      <option value="90">Últimos 90 dias</option>
+  <div style="display:flex;align-items:center;gap:9px">
+    <div class="tbadge"><div class="tdot"></div><span id="tbAcc">Conectado</span></div>
+    <select class="tsel" id="periodSel" onchange="onPeriodChange()">
+      <option value="7">7 dias</option>
+      <option value="28" selected>28 dias</option>
+      <option value="90">90 dias</option>
     </select>
-    <button class="btn" onclick="logout()">↩ Trocar conta</button>
+    <button class="btn" onclick="logout()" style="font-size:12px;padding:6px 11px">↩ Trocar</button>
   </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs" id="tabs" style="display:none">
+  <button class="tab active" onclick="switchTab('overview',this)">Visão geral</button>
+  <button class="tab" onclick="switchTab('posts',this)">Publicações</button>
+  <button class="tab" onclick="switchTab('hashtags',this)">Hashtags</button>
+  <button class="tab" onclick="switchTab('timing',this)">Melhores horários</button>
+  <button class="tab" onclick="switchTab('calendar',this)">Calendário</button>
+  <button class="tab" onclick="switchTab('insights',this)">Insights</button>
 </div>
 
 <!-- DASHBOARD -->
 <div id="dashboard">
-  <div class="profile-header">
-    <div class="profile-av" id="profileAv">?</div>
-    <div class="profile-info">
-      <h2 id="profileName">—</h2>
-      <p id="profileHandle">—</p>
-      <div class="profile-tags" id="profileTags"></div>
-    </div>
-    <div class="profile-stats">
-      <div><div class="pstat-val" id="statFollowers">—</div><div class="pstat-lbl">seguidores</div></div>
-      <div><div class="pstat-val" id="statPosts">—</div><div class="pstat-lbl">publicações</div></div>
-      <div><div class="pstat-val" id="statEng">—</div><div class="pstat-lbl">eng. médio</div></div>
-    </div>
-  </div>
 
-  <div class="kpi-grid">
-    <div class="kpi-card"><div class="kpi-label">Alcance</div><div class="kpi-value" id="kpiReach">—</div></div>
-    <div class="kpi-card"><div class="kpi-label">Impressões</div><div class="kpi-value" id="kpiImpressions">—</div></div>
-    <div class="kpi-card"><div class="kpi-label">Engajamento</div><div class="kpi-value" id="kpiEngagement">—</div></div>
-    <div class="kpi-card"><div class="kpi-label">Novos seguidores</div><div class="kpi-value" id="kpiFollowers">—</div></div>
-  </div>
-
-  <div class="charts-row">
-    <div class="chart-card">
-      <div class="chart-title">Alcance ao longo do tempo</div>
-      <div class="chart-sub" id="chartSubTitle">Últimos 28 dias</div>
-      <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#1877F2"></div>Alcance</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#E91E8C"></div>Impressões</div>
+  <!-- OVERVIEW -->
+  <div class="pane active" id="pane-overview">
+    <div class="profile-hdr">
+      <div class="p-av" id="pAv">?</div>
+      <div class="p-info">
+        <h2 id="pName">—</h2>
+        <p id="pHandle">—</p>
+        <div class="p-tags" id="pTags"></div>
       </div>
-      <div style="position:relative;height:200px"><canvas id="lineChart" role="img" aria-label="Alcance e impressões ao longo do tempo"></canvas></div>
+      <div class="p-stats">
+        <div><div class="psv" id="sFollowers">—</div><div class="psl">seguidores</div></div>
+        <div><div class="psv" id="sPosts">—</div><div class="psl">publicações</div></div>
+        <div><div class="psv" id="sEng">—</div><div class="psl">eng. médio</div></div>
+      </div>
     </div>
-    <div class="chart-card">
-      <div class="chart-title">Tipo de conteúdo</div>
-      <div class="chart-sub">Distribuição dos seus posts</div>
-      <div style="position:relative;height:160px;margin-bottom:12px"><canvas id="doughnutChart" role="img" aria-label="Distribuição por tipo de conteúdo"></canvas></div>
-      <div id="doughnutLegend" style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted)"></div>
+    <div class="g4">
+      <div class="kpi"><div class="kpi-l">Total de curtidas</div><div class="kpi-v" id="kLikes">—</div></div>
+      <div class="kpi"><div class="kpi-l">Total de comentários</div><div class="kpi-v" id="kComments">—</div></div>
+      <div class="kpi"><div class="kpi-l">Melhor post</div><div class="kpi-v" id="kBest">—</div><div style="font-size:10px;color:var(--muted)" id="kBestSub"></div></div>
+      <div class="kpi"><div class="kpi-l">Posts no período</div><div class="kpi-v" id="kPeriodPosts">—</div></div>
+    </div>
+    <div class="g21">
+      <div class="card">
+        <div class="card-title">Engajamento ao longo do tempo</div>
+        <div class="card-sub" id="engSubTitle">Curtidas + comentários por post</div>
+        <div class="legend">
+          <div class="leg-item"><div class="leg-dot" style="background:#1877F2"></div>Curtidas</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#E91E8C;border-style:dashed"></div>Comentários</div>
+        </div>
+        <div style="position:relative;height:200px"><canvas id="engChart" role="img" aria-label="Engajamento por post ao longo do tempo"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Tipo de conteúdo</div>
+        <div class="card-sub">Distribuição dos seus posts</div>
+        <div style="position:relative;height:150px;margin-bottom:10px"><canvas id="typeChart" role="img" aria-label="Distribuição por tipo de conteúdo"></canvas></div>
+        <div id="typeLegend" style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted)"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Publicações recentes</div>
+      <div class="card-sub">Passe o mouse para ver a legenda</div>
+      <div class="mgrid" id="mediaGrid"><div class="empty-state">Carregando...</div></div>
     </div>
   </div>
 
-  <div class="bottom-row">
-    <div class="chart-card">
-      <div class="chart-title">Top publicações</div>
-      <div class="chart-sub">Melhores posts por curtidas</div>
-      <table class="posts-table">
-        <thead><tr><th style="width:44%">Post</th><th>Tipo</th><th>Curtidas</th><th>Eng.</th></tr></thead>
-        <tbody id="postsTableBody"><tr><td colspan="4" style="color:var(--muted);padding:16px 0;font-size:13px">Carregando...</td></tr></tbody>
+  <!-- POSTS -->
+  <div class="pane" id="pane-posts">
+    <div class="card">
+      <div class="card-title">Todas as publicações</div>
+      <div class="card-sub">Ordenadas por engajamento</div>
+      <table class="ptbl">
+        <thead><tr>
+          <th style="width:35%">Post</th>
+          <th>Tipo</th>
+          <th>Curtidas</th>
+          <th>Comentários</th>
+          <th>Eng. total</th>
+          <th>Data</th>
+        </tr></thead>
+        <tbody id="postsBody"><tr><td colspan="6" class="empty-state">Carregando...</td></tr></tbody>
       </table>
     </div>
-    <div class="chart-card">
-      <div class="chart-title">Audiência</div>
-      <div class="chart-sub">Perfil dos seus seguidores</div>
-      <div id="audienceSection"><div style="color:var(--muted);font-size:13px">Carregando audiência...</div></div>
+  </div>
+
+  <!-- HASHTAGS -->
+  <div class="pane" id="pane-hashtags">
+    <div class="g2">
+      <div class="card">
+        <div class="card-title">Hashtags mais usadas</div>
+        <div class="card-sub">Frequência de uso nos seus posts</div>
+        <div class="hashtag-cloud" id="hashtagCloud"><div class="empty-state">Carregando...</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Hashtags com mais engajamento</div>
+        <div class="card-sub">Média de curtidas por hashtag</div>
+        <div id="hashtagEngList"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Desempenho por hashtag</div>
+      <div class="card-sub">Top 10 hashtags por engajamento médio</div>
+      <div style="position:relative;height:260px"><canvas id="hashChart" role="img" aria-label="Desempenho por hashtag"></canvas></div>
     </div>
   </div>
 
-  <div class="chart-card" style="margin-bottom:24px">
-    <div class="chart-title" style="margin-bottom:4px">Publicações recentes</div>
-    <div class="chart-sub">Últimos posts do seu perfil</div>
-    <div class="media-grid" id="mediaGrid"><div style="color:var(--muted);font-size:13px;grid-column:1/-1;padding:20px 0">Carregando...</div></div>
+  <!-- TIMING -->
+  <div class="pane" id="pane-timing">
+    <div class="g3">
+      <div class="card">
+        <div class="card-title">Melhor dia da semana</div>
+        <div class="card-sub">Por engajamento médio</div>
+        <div style="position:relative;height:180px"><canvas id="dayChart" role="img" aria-label="Engajamento por dia da semana"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Melhor horário</div>
+        <div class="card-sub">Por engajamento médio</div>
+        <div style="position:relative;height:180px"><canvas id="hourChart" role="img" aria-label="Engajamento por horário"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Frequência de posts</div>
+        <div class="card-sub">Quantos posts por dia da semana</div>
+        <div style="position:relative;height:180px"><canvas id="freqChart" role="img" aria-label="Frequência de posts por dia"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Mapa de calor — engajamento por hora e dia</div>
+      <div class="card-sub">Média de curtidas por horário de publicação</div>
+      <div id="heatmapContainer" style="overflow-x:auto;padding-bottom:8px"></div>
+    </div>
   </div>
 
-  <div style="text-align:center;padding:16px 0;font-size:12px;color:var(--muted)">MetaInsights · Meta Graph API · <span id="lastUpdated"></span></div>
+  <!-- CALENDAR -->
+  <div class="pane" id="pane-calendar">
+    <div class="card">
+      <div class="card-title" id="calTitle">Calendário de publicações</div>
+      <div class="card-sub">Dias com publicações destacados em azul</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <button class="btn" onclick="calPrev()">← anterior</button>
+        <span style="font-size:14px;font-weight:600" id="calMonthLabel"></span>
+        <button class="btn" onclick="calNext()">próximo →</button>
+      </div>
+      <div class="cal-header">
+        <div class="cal-day-lbl">Dom</div><div class="cal-day-lbl">Seg</div><div class="cal-day-lbl">Ter</div>
+        <div class="cal-day-lbl">Qua</div><div class="cal-day-lbl">Qui</div><div class="cal-day-lbl">Sex</div><div class="cal-day-lbl">Sáb</div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div id="calPostDetail" style="margin-top:14px;display:none">
+        <div class="sec-title">Posts neste dia</div>
+        <div id="calPostList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="pane" id="pane-insights">
+    <div class="g2">
+      <div class="card">
+        <div class="card-title">Score de consistência</div>
+        <div class="card-sub">Baseado na frequência de posts</div>
+        <div class="score-ring">
+          <canvas id="scoreChart" width="90" height="90" role="img" aria-label="Score de consistência"></canvas>
+          <div class="score-num" id="scoreNum">—</div>
+        </div>
+        <div style="text-align:center;font-size:12px;color:var(--muted)" id="scoreLabel"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Taxa de engajamento</div>
+        <div class="card-sub">Média por post vs seguidores</div>
+        <div class="score-ring">
+          <canvas id="engRateChart" width="90" height="90" role="img" aria-label="Taxa de engajamento"></canvas>
+          <div class="score-num" id="engRateNum">—</div>
+        </div>
+        <div style="text-align:center;font-size:12px;color:var(--muted)" id="engRateLabel"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recomendações automáticas</div>
+      <div class="card-sub">Baseadas nos dados reais da sua conta</div>
+      <div id="insightsList"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-let TOKEN = '', PROXY = '', ACCOUNT_ID = '', ACCOUNT_TYPE = '';
-let accountsData = [], lineChartInst = null, doughnutInst = null;
+let TOKEN='',PROXY='',ACCOUNT_ID='',ACCOUNT_TYPE='instagram';
+let allPosts=[],accountsData=[];
+let engChartInst=null,typeChartInst=null,hashChartInst=null;
+let dayChartInst=null,hourChartInst=null,freqChartInst=null;
+let scoreChartInst=null,engRateChartInst=null;
+let calMonth=new Date().getMonth(),calYear=new Date().getFullYear();
 
-function fmtNum(n) {
-  if (n === undefined || n === null || isNaN(n)) return '—';
-  n = parseInt(n);
-  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
-  if (n >= 1000) return (n/1000).toFixed(1)+'K';
-  return n.toLocaleString('pt-BR');
-}
+const fmt=n=>{if(n===undefined||n===null||isNaN(n))return'—';n=parseInt(n);if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return n.toLocaleString('pt-BR');};
+const toggleTok=()=>{const i=document.getElementById('tokenInput');i.type=i.type==='password'?'text':'password';};
+const showSt=(id,msg)=>{'stE stL stS'.split(' ').forEach(s=>document.getElementById(s).style.display='none');if(id){document.getElementById(id).style.display='flex';if(msg)document.getElementById(id+'m').textContent=msg;}};
+const setLov=(msg)=>{const o=document.getElementById('lov');if(msg){o.style.display='flex';document.getElementById('ltxt').textContent=msg;}else o.style.display='none';};
+const switchTab=(id,el)=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));document.getElementById('pane-'+id).classList.add('active');};
 
-function toggleToken() {
-  const i = document.getElementById('tokenInput');
-  i.type = i.type === 'password' ? 'text' : 'password';
-}
-
-function showStatus(id, msg) {
-  ['statusError','statusLoading','statusSuccess'].forEach(s => document.getElementById(s).style.display = 'none');
-  if (id) {
-    document.getElementById(id).style.display = 'flex';
-    if (msg) {
-      const el = id === 'statusError' ? 'errorMsg' : id === 'statusLoading' ? 'loadingMsg' : 'successMsg';
-      document.getElementById(el).textContent = msg;
-    }
-  }
-}
-
-function setLoading(msg) {
-  const ol = document.getElementById('loadingOverlay');
-  if (msg) { ol.style.display = 'flex'; document.getElementById('loadingText').textContent = msg; }
-  else ol.style.display = 'none';
-}
-
-// All API calls go through the proxy
-async function apiCall(path, params = {}) {
-  const proxy = PROXY.replace(/\/$/, '');
-  const qs = new URLSearchParams({ ...params, access_token: TOKEN }).toString();
-  const url = `${proxy}/graph${path}?${qs}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+async function apiCall(path,params={}){
+  const p=PROXY.replace(/\/$/,'');
+  const qs=new URLSearchParams({...params,access_token:TOKEN}).toString();
+  const res=await fetch(`${p}/graph${path}?${qs}`);
+  const data=await res.json();
+  if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
   return data;
 }
 
-async function handleConnect() {
-  const token = document.getElementById('tokenInput').value.trim();
-  const proxy = document.getElementById('proxyInput').value.trim();
-  const manualId = document.getElementById('manualIgId').value.trim();
-  if (!token) { showStatus('statusError', 'Cole seu token de acesso.'); return; }
-  if (!proxy) { showStatus('statusError', 'Cole a URL do seu Cloudflare Worker.'); return; }
-
-  TOKEN = token;
-  PROXY = proxy;
-
-  // Se informou ID manual, usa direto
-  if (manualId) {
-    ACCOUNT_ID = manualId;
-    ACCOUNT_TYPE = 'instagram';
-    accountsData = [{ id: manualId, name: '@osvaldoalvesss', type: 'instagram', selected: true }];
-    await loadDashboard();
-    return;
-  }
-
-  if (accountsData.length === 0) {
-    await fetchAccounts();
-  } else {
-    const sel = accountsData.find(a => a.selected);
-    if (!sel) { showStatus('statusError', 'Selecione uma conta.'); return; }
-    ACCOUNT_ID = sel.id;
-    ACCOUNT_TYPE = sel.type;
-    await loadDashboard();
-  }
+async function handleConnect(){
+  const token=document.getElementById('tokenInput').value.trim();
+  const proxy=document.getElementById('proxyInput').value.trim();
+  const manual=document.getElementById('manualId').value.trim();
+  if(!token){showSt('stE','Cole seu token.');return;}
+  if(!proxy){showSt('stE','Cole a URL do Worker.');return;}
+  TOKEN=token;PROXY=proxy;
+  if(manual){ACCOUNT_ID=manual;ACCOUNT_TYPE='instagram';accountsData=[{id:manual,name:'@osvaldoalvesss',type:'instagram',selected:true}];await loadDashboard();return;}
+  if(accountsData.length===0){await fetchAccounts();}
+  else{const sel=accountsData.find(a=>a.selected);if(!sel){showSt('stE','Selecione uma conta.');return;}ACCOUNT_ID=sel.id;ACCOUNT_TYPE=sel.type;await loadDashboard();}
 }
 
-async function fetchAccounts() {
-  showStatus('statusLoading', 'Validando token e buscando contas...');
-  document.getElementById('connectBtn').disabled = true;
-  try {
-    const data = await apiCall('/v19.0/me', { fields: 'id,name,accounts{id,name,category,fan_count,instagram_business_account{id,username,followers_count,media_count}}' });
-    accountsData = [];
-    if (data.accounts && data.accounts.data) {
-      data.accounts.data.forEach(acc => {
-        accountsData.push({ id: acc.id, name: acc.name, type: 'facebook', label: 'Facebook Page', fans: acc.fan_count, color: '#1877F2', letter: acc.name[0].toUpperCase() });
-        if (acc.instagram_business_account) {
-          accountsData.push({ id: acc.instagram_business_account.id, name: '@' + (acc.instagram_business_account.username || acc.name), type: 'instagram', label: 'Instagram Business', fans: acc.instagram_business_account.followers_count, color: '#c2185b', letter: 'IG', username: acc.instagram_business_account.username });
-        }
+async function fetchAccounts(){
+  showSt('stL','Validando token...');
+  document.getElementById('connBtn').disabled=true;
+  try{
+    const data=await apiCall('/v19.0/me',{fields:'id,name,accounts{id,name,category,fan_count,instagram_business_account{id,username,followers_count,media_count}}'});
+    accountsData=[];
+    if(data.accounts?.data){
+      data.accounts.data.forEach(acc=>{
+        accountsData.push({id:acc.id,name:acc.name,type:'facebook',label:'Facebook Page',fans:acc.fan_count,color:'#1877F2',letter:acc.name[0].toUpperCase()});
+        if(acc.instagram_business_account)accountsData.push({id:acc.instagram_business_account.id,name:'@'+(acc.instagram_business_account.username||acc.name),type:'instagram',label:'Instagram Business',fans:acc.instagram_business_account.followers_count,color:'#c2185b',letter:'IG'});
       });
     }
-    if (accountsData.length === 0) {
-      accountsData.push({ id: data.id, name: data.name, type: 'user', label: 'Conta pessoal', fans: null, color: '#1877F2', letter: (data.name||'U')[0].toUpperCase() });
-    }
-    renderAccountsList();
-    showStatus('statusSuccess', `Token válido! ${accountsData.length} conta(s) encontrada(s).`);
-    document.getElementById('accountsSection').style.display = 'block';
-    document.getElementById('connectBtn').textContent = 'Analisar conta selecionada';
-  } catch(e) {
-    showStatus('statusError', e.message || 'Erro ao conectar. Verifique o token e a URL do proxy.');
-  }
-  document.getElementById('connectBtn').disabled = false;
+    if(!accountsData.length)accountsData.push({id:data.id,name:data.name,type:'user',label:'Conta pessoal',fans:null,color:'#1877F2',letter:(data.name||'U')[0].toUpperCase()});
+    renderAccounts();
+    showSt('stS',`Token válido! ${accountsData.length} conta(s) encontrada(s).`);
+    document.getElementById('accsSection').style.display='block';
+    document.getElementById('connBtn').textContent='Analisar conta selecionada';
+  }catch(e){showSt('stE',e.message||'Erro ao conectar.');}
+  document.getElementById('connBtn').disabled=false;
 }
 
-function renderAccountsList() {
-  const list = document.getElementById('accountsList');
-  list.innerHTML = '';
-  accountsData.forEach((acc, i) => {
-    const div = document.createElement('div');
-    div.className = 'account-item' + (i === 0 ? ' selected' : '');
-    div.innerHTML = `<div class="acc-av" style="background:${acc.color}">${acc.letter}</div><div><div class="acc-name">${acc.name}</div><div class="acc-type">${acc.label}${acc.fans ? ' · '+fmtNum(acc.fans)+' seguidores' : ''}</div></div><span class="acc-check">✓</span>`;
-    div.onclick = () => {
-      accountsData.forEach(a => a.selected = false);
-      acc.selected = true;
-      document.querySelectorAll('.account-item').forEach(el => el.classList.remove('selected'));
-      div.classList.add('selected');
-    };
-    if (i === 0) acc.selected = true;
+function renderAccounts(){
+  const list=document.getElementById('accsList');list.innerHTML='';
+  accountsData.forEach((acc,i)=>{
+    const div=document.createElement('div');div.className='acc-item'+(i===0?' sel':'');
+    div.innerHTML=`<div class="acc-av" style="background:${acc.color}">${acc.letter}</div><div><div class="acc-n">${acc.name}</div><div class="acc-t">${acc.label}${acc.fans?' · '+fmt(acc.fans)+' seguidores':''}</div></div><span class="acc-ck">✓</span>`;
+    div.onclick=()=>{accountsData.forEach(a=>a.selected=false);acc.selected=true;document.querySelectorAll('.acc-item').forEach(e=>e.classList.remove('sel'));div.classList.add('sel');};
+    if(i===0)acc.selected=true;
     list.appendChild(div);
   });
 }
 
-async function loadDashboard() {
-  setLoading('Conectando à sua conta...');
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('topbar').style.display = 'flex';
-  document.getElementById('dashboard').style.display = 'block';
-  const acc = accountsData.find(a => a.id === ACCOUNT_ID);
-  document.getElementById('topbarAccount').textContent = acc ? acc.name : 'Conectado';
-  document.getElementById('lastUpdated').textContent = 'Atualizado ' + new Date().toLocaleTimeString('pt-BR');
-
-  setLoading('Buscando perfil...'); await fetchProfile();
-  setLoading('Carregando insights...'); await fetchInsights();
-  setLoading('Buscando publicações...'); await fetchMedia();
-  setLoading('Carregando audiência...'); await fetchAudience();
-  setLoading(null);
+async function loadDashboard(){
+  setLov('Conectando...');
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('topbar').style.display='flex';
+  document.getElementById('tabs').style.display='flex';
+  document.getElementById('dashboard').style.display='block';
+  const acc=accountsData.find(a=>a.id===ACCOUNT_ID);
+  document.getElementById('tbAcc').textContent=acc?acc.name:'Conectado';
+  setLov('Buscando perfil...');await fetchProfile();
+  setLov('Carregando publicações...');await fetchAllMedia();
+  setLov('Analisando dados...');
+  renderOverview();renderPostsTab();renderHashtags();renderTiming();renderCalendar();renderInsights();
+  setLov(null);
 }
 
-async function fetchProfile() {
-  try {
+async function fetchProfile(){
+  try{
     let data;
-    if (ACCOUNT_TYPE === 'instagram') {
-      data = await apiCall(`/v19.0/${ACCOUNT_ID}`, { fields: 'id,username,name,biography,followers_count,media_count,website' });
-      document.getElementById('profileAv').textContent = (data.username || 'IG')[0].toUpperCase();
-      document.getElementById('profileName').textContent = data.name || ('@' + data.username);
-      document.getElementById('profileHandle').textContent = '@' + data.username + (data.biography ? ' · ' + data.biography.substring(0,80) : '');
-      document.getElementById('statFollowers').textContent = fmtNum(data.followers_count);
-      document.getElementById('statPosts').textContent = fmtNum(data.media_count);
-      document.getElementById('profileTags').innerHTML = '<span class="tag tag-blue">Instagram Business</span>';
-    } else {
-      data = await apiCall(`/v19.0/${ACCOUNT_ID}`, { fields: 'id,name,category,fan_count,posts.limit(1).summary(true)' });
-      document.getElementById('profileAv').textContent = (data.name||'F')[0].toUpperCase();
-      document.getElementById('profileName').textContent = data.name;
-      document.getElementById('profileHandle').textContent = data.category || 'Página do Facebook';
-      document.getElementById('statFollowers').textContent = fmtNum(data.fan_count);
-      document.getElementById('statPosts').textContent = data.posts?.summary ? fmtNum(data.posts.summary.total_count) : '—';
-      document.getElementById('profileTags').innerHTML = '<span class="tag tag-blue">Facebook Page</span>' + (data.category ? `<span class="tag tag-gray">${data.category}</span>` : '');
+    if(ACCOUNT_TYPE==='instagram'){
+      data=await apiCall(`/v19.0/${ACCOUNT_ID}`,{fields:'id,username,name,biography,followers_count,media_count,website'});
+      document.getElementById('pAv').textContent=(data.username||'IG')[0].toUpperCase();
+      document.getElementById('pName').textContent=data.name||('@'+data.username);
+      document.getElementById('pHandle').textContent='@'+data.username+(data.biography?' · '+data.biography.substring(0,80):'');
+      document.getElementById('sFollowers').textContent=fmt(data.followers_count);
+      document.getElementById('sPosts').textContent=fmt(data.media_count);
+      document.getElementById('pTags').innerHTML='<span class="ptag ptag-b">Instagram Business</span>';
+      window._followers=data.followers_count||0;
+    }else{
+      data=await apiCall(`/v19.0/${ACCOUNT_ID}`,{fields:'id,name,category,fan_count'});
+      document.getElementById('pAv').textContent=(data.name||'F')[0].toUpperCase();
+      document.getElementById('pName').textContent=data.name;
+      document.getElementById('pHandle').textContent=data.category||'Página do Facebook';
+      document.getElementById('sFollowers').textContent=fmt(data.fan_count);
+      document.getElementById('pTags').innerHTML='<span class="ptag ptag-b">Facebook Page</span>'+(data.category?`<span class="ptag ptag-g">${data.category}</span>`:'');
+      window._followers=data.fan_count||0;
     }
-    document.getElementById('statEng').textContent = '—';
-  } catch(e) { console.error('Profile:', e); }
+  }catch(e){console.error('Profile:',e);}
 }
 
-async function fetchInsights() {
-  try {
-    const period = document.getElementById('periodSelect').value;
-    document.getElementById('chartSubTitle').textContent = `Últimos ${period} dias`;
-    const sinceTs = Math.floor((Date.now() - period * 86400000) / 1000);
-    let reachVals = [], impressionVals = [], labels = [], reachTotal = 0, impressionsTotal = 0, followerGrowth = 0, engTotal = 0;
-
-    if (ACCOUNT_TYPE === 'instagram') {
-      const data = await apiCall(`/v19.0/${ACCOUNT_ID}/insights`, { metric: 'reach,impressions,follower_count,profile_views', period: 'day', since: sinceTs });
-      data.data.forEach(m => {
-        if (m.name === 'reach') { m.values.forEach(v => { reachVals.push(v.value); reachTotal += v.value; labels.push(new Date(v.end_time).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})); }); }
-        if (m.name === 'impressions') { m.values.forEach(v => { impressionVals.push(v.value); impressionsTotal += v.value; }); }
-        if (m.name === 'follower_count' && m.values.length >= 2) followerGrowth = m.values[m.values.length-1].value - m.values[0].value;
-      });
-    } else {
-      const data = await apiCall(`/v19.0/${ACCOUNT_ID}/insights`, { metric: 'page_impressions,page_reach,page_follows,page_post_engagements', period: 'day', since: sinceTs });
-      data.data.forEach(m => {
-        if (m.name === 'page_reach') { m.values.forEach(v => { reachVals.push(v.value); reachTotal += v.value; labels.push(new Date(v.end_time).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})); }); }
-        if (m.name === 'page_impressions') { m.values.forEach(v => { impressionVals.push(v.value); impressionsTotal += v.value; }); }
-        if (m.name === 'page_follows') { m.values.forEach(v => { followerGrowth += v.value; }); }
-        if (m.name === 'page_post_engagements') { m.values.forEach(v => { engTotal += v.value; }); }
-      });
+async function fetchAllMedia(){
+  allPosts=[];
+  try{
+    let url,cursor='',limit=50;
+    const fields=ACCOUNT_TYPE==='instagram'
+      ?'id,caption,media_type,thumbnail_url,media_url,timestamp,like_count,comments_count,permalink'
+      :'id,message,story,created_time,attachments{type,media_type},reactions.summary(true),comments.summary(true)';
+    let hasMore=true,page=0;
+    while(hasMore&&page<4){
+      const params={fields,limit};
+      if(cursor)params.after=cursor;
+      const ep=ACCOUNT_TYPE==='instagram'?`/v19.0/${ACCOUNT_ID}/media`:`/v19.0/${ACCOUNT_ID}/posts`;
+      const data=await apiCall(ep,params);
+      if(data.data)allPosts=[...allPosts,...data.data];
+      cursor=data.paging?.cursors?.after||'';
+      hasMore=!!(data.paging?.next&&cursor);
+      page++;
     }
-
-    document.getElementById('kpiReach').textContent = fmtNum(reachTotal);
-    document.getElementById('kpiImpressions').textContent = fmtNum(impressionsTotal);
-    document.getElementById('kpiFollowers').textContent = (followerGrowth >= 0 ? '+' : '') + fmtNum(followerGrowth);
-    document.getElementById('kpiEngagement').textContent = engTotal > 0 ? fmtNum(engTotal) : '—';
-    renderLineChart(labels, reachVals, impressionVals);
-  } catch(e) { console.error('Insights:', e); }
+  }catch(e){console.error('Media:',e);}
 }
 
-function renderLineChart(labels, reach, impressions) {
-  if (lineChartInst) lineChartInst.destroy();
-  lineChartInst = new Chart(document.getElementById('lineChart'), {
-    type: 'line',
-    data: { labels, datasets: [
-      { label: 'Alcance', data: reach, borderColor: '#1877F2', backgroundColor: 'rgba(24,119,242,0.07)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4 },
-      { label: 'Impressões', data: impressions, borderColor: '#E91E8C', backgroundColor: 'rgba(233,30,140,0.06)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4, borderDash: [4,3] }
+function getLikes(p){return p.like_count||p.reactions?.summary?.total_count||0;}
+function getComments(p){return p.comments_count||p.comments?.summary?.total_count||0;}
+function getEng(p){return getLikes(p)+getComments(p);}
+function getType(p){return p.media_type||(p.attachments?.data[0]?.media_type||p.attachments?.data[0]?.type||'POST');}
+function getDate(p){return new Date(p.timestamp||p.created_time);}
+function getCaption(p){return p.caption||p.message||p.story||'';}
+
+function renderOverview(){
+  const period=parseInt(document.getElementById('periodSel').value);
+  const since=new Date(Date.now()-period*86400000);
+  const filtered=allPosts.filter(p=>getDate(p)>=since);
+  const totalLikes=filtered.reduce((s,p)=>s+getLikes(p),0);
+  const totalComments=filtered.reduce((s,p)=>s+getComments(p),0);
+  const sorted=[...filtered].sort((a,b)=>getEng(b)-getEng(a));
+  const best=sorted[0];
+  document.getElementById('kLikes').textContent=fmt(totalLikes);
+  document.getElementById('kComments').textContent=fmt(totalComments);
+  document.getElementById('kPeriodPosts').textContent=fmt(filtered.length);
+  if(best){document.getElementById('kBest').textContent=fmt(getEng(best));document.getElementById('kBestSub').textContent=fmt(getLikes(best))+' curtidas';}
+  const avgEng=filtered.length?Math.round(filtered.reduce((s,p)=>s+getEng(p),0)/filtered.length):0;
+  const engRate=window._followers?((avgEng/window._followers)*100).toFixed(2)+'%':'—';
+  document.getElementById('sEng').textContent=engRate;
+  // Engagement chart
+  const chartPosts=sorted.slice(0,20).reverse();
+  const labels=chartPosts.map(p=>getDate(p).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}));
+  const likes=chartPosts.map(p=>getLikes(p));
+  const comments=chartPosts.map(p=>getComments(p));
+  if(engChartInst)engChartInst.destroy();
+  engChartInst=new Chart(document.getElementById('engChart'),{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'Curtidas',data:likes,backgroundColor:'rgba(24,119,242,0.8)',borderRadius:3},
+      {label:'Comentários',data:comments,backgroundColor:'rgba(233,30,140,0.7)',borderRadius:3}
     ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } }, scales: { x: { ticks: { font: { size: 10 }, color: '#999', maxTicksLimit: 10, autoSkip: true }, grid: { display: false }, border: { display: false } }, y: { ticks: { font: { size: 10 }, color: '#999', callback: v => v >= 1000 ? (v/1000).toFixed(1)+'K' : v }, grid: { color: 'rgba(0,0,0,0.04)' }, border: { display: false } } } }
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},scales:{x:{ticks:{font:{size:9},color:'#999',maxTicksLimit:12,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999',callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},stacked:true}}
   });
+  // Type chart
+  const typeCounts={};
+  filtered.forEach(p=>{const t=getType(p);typeCounts[t]=(typeCounts[t]||0)+1;});
+  const tLabels=Object.keys(typeCounts),tVals=Object.values(typeCounts);
+  const tColors=['#6a1b9a','#1877F2','#E91E8C','#ff9800','#1D9E75'];
+  const total=tVals.reduce((a,b)=>a+b,0);
+  if(typeChartInst)typeChartInst.destroy();
+  typeChartInst=new Chart(document.getElementById('typeChart'),{
+    type:'doughnut',
+    data:{labels:tLabels,datasets:[{data:tVals,backgroundColor:tColors.slice(0,tLabels.length),borderWidth:0,hoverOffset:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'65%'}
+  });
+  document.getElementById('typeLegend').innerHTML=tLabels.map((l,i)=>`<span style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:2px;background:${tColors[i]};flex-shrink:0"></span>${l} · ${Math.round(tVals[i]/total*100)}%</span>`).join('');
+  // Media grid
+  renderMediaGrid(filtered.slice(0,12));
 }
 
-async function fetchMedia() {
-  try {
-    let data;
-    if (ACCOUNT_TYPE === 'instagram') {
-      data = await apiCall(`/v19.0/${ACCOUNT_ID}/media`, { fields: 'id,caption,media_type,thumbnail_url,media_url,timestamp,like_count,comments_count,permalink', limit: 9 });
-    } else {
-      data = await apiCall(`/v19.0/${ACCOUNT_ID}/posts`, { fields: 'id,message,story,created_time,attachments{type,media_type},reactions.summary(true),comments.summary(true)', limit: 9 });
-    }
-    renderMedia(data.data);
-    renderPostsTable(data.data);
-    const typeCounts = {};
-    data.data.forEach(p => {
-      const t = ACCOUNT_TYPE === 'instagram' ? p.media_type : (p.attachments?.data[0]?.media_type || p.attachments?.data[0]?.type || 'TEXT');
-      typeCounts[t] = (typeCounts[t] || 0) + 1;
-    });
-    renderDoughnut(typeCounts);
-  } catch(e) { console.error('Media:', e); }
-}
-
-function renderMedia(posts) {
-  const grid = document.getElementById('mediaGrid');
-  if (!posts?.length) { grid.innerHTML = '<div style="color:var(--muted);font-size:13px;grid-column:1/-1;padding:20px 0">Nenhuma publicação encontrada.</div>'; return; }
-  grid.innerHTML = '';
-  posts.forEach(p => {
-    const div = document.createElement('div');
-    div.className = 'media-item';
-    const likes = p.like_count || p.reactions?.summary?.total_count || 0;
-    const comments = p.comments_count || p.comments?.summary?.total_count || 0;
-    const type = p.media_type || 'POST';
-    const imgUrl = p.media_url || p.thumbnail_url || '';
-    div.innerHTML = imgUrl
-      ? `<img src="${imgUrl}" alt="post" loading="lazy" onerror="this.style.display='none'"><div class="media-type-badge">${type}</div><div class="media-overlay"><span>♥ ${fmtNum(likes)}</span><span>💬 ${fmtNum(comments)}</span></div>`
-      : `<div style="font-size:11px;color:var(--muted);text-align:center;padding:10px">${(p.caption||p.message||p.story||'Post').substring(0,60)}</div><div style="position:absolute;bottom:8px;font-size:11px;color:var(--muted)">♥ ${fmtNum(likes)}</div>`;
-    if (p.permalink) div.onclick = () => window.open(p.permalink, '_blank');
+function renderMediaGrid(posts){
+  const grid=document.getElementById('mediaGrid');
+  if(!posts?.length){grid.innerHTML='<div class="empty-state">Nenhuma publicação encontrada.</div>';return;}
+  grid.innerHTML='';
+  posts.forEach(p=>{
+    const div=document.createElement('div');div.className='mitem';
+    const img=p.media_url||p.thumbnail_url||'';
+    const cap=(getCaption(p)||'').substring(0,80);
+    div.innerHTML=img?`<img src="${img}" loading="lazy" alt="post" onerror="this.style.display='none'"><div class="mbadge">${getType(p)}</div><div class="mov"><span>♥ ${fmt(getLikes(p))}</span><span>💬 ${fmt(getComments(p))}</span></div>${cap?`<div class="mcap">${cap}</div>`:''}`
+      :`<div style="font-size:10px;color:var(--muted);text-align:center;padding:8px;z-index:1">${cap.substring(0,60)||'Post'}</div><div style="position:absolute;bottom:6px;font-size:10px;color:var(--muted)">♥ ${fmt(getLikes(p))}</div>`;
+    if(p.permalink)div.onclick=()=>window.open(p.permalink,'_blank');
     grid.appendChild(div);
   });
 }
 
-function renderPostsTable(posts) {
-  const tbody = document.getElementById('postsTableBody');
-  if (!posts?.length) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);padding:16px 0">Nenhum post encontrado.</td></tr>'; return; }
-  tbody.innerHTML = '';
-  [...posts].sort((a,b) => {
-    const la = a.like_count || a.reactions?.summary?.total_count || 0;
-    const lb = b.like_count || b.reactions?.summary?.total_count || 0;
-    return lb - la;
-  }).slice(0,6).forEach(p => {
-    const likes = p.like_count || p.reactions?.summary?.total_count || 0;
-    const type = p.media_type || 'POST';
-    const caption = (p.caption || p.message || p.story || '—').substring(0,40);
-    const typeClass = ['VIDEO','REEL'].includes(type) ? 'type-reel' : type === 'CAROUSEL_ALBUM' ? 'type-carousel' : type === 'IMAGE' ? 'type-image' : 'type-video';
-    const date = new Date(p.timestamp || p.created_time).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="max-width:160px"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${caption}</div><div style="font-size:10px;color:var(--muted)">${date}</div></td><td><span class="post-type ${typeClass}">${type}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px">${fmtNum(likes)}</span></td><td><span style="font-size:12px;color:var(--blue)">${likes > 0 ? (likes/1000).toFixed(2)+'%' : '—'}</span></td>`;
+function renderPostsTab(){
+  const tbody=document.getElementById('postsBody');
+  if(!allPosts.length){tbody.innerHTML='<tr><td colspan="6" class="empty-state">Nenhum post.</td></tr>';return;}
+  tbody.innerHTML='';
+  const sorted=[...allPosts].sort((a,b)=>getEng(b)-getEng(a));
+  const maxEng=getEng(sorted[0])||1;
+  sorted.forEach(p=>{
+    const l=getLikes(p),c=getComments(p),e=l+c;
+    const type=getType(p);
+    const tc=type==='VIDEO'||type==='REEL'?'pt-r':type==='CAROUSEL_ALBUM'?'pt-c':type==='IMAGE'?'pt-i':'pt-v';
+    const cap=(getCaption(p)||'—').substring(0,50);
+    const date=getDate(p).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+    const pct=Math.round(e/maxEng*100);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="max-width:180px"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${cap}</div>${p.permalink?`<a href="${p.permalink}" target="_blank" style="font-size:10px;color:var(--blue)">ver post ↗</a>`:''}</td><td><span class="ptype ${tc}">${type}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px">${fmt(l)}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px">${fmt(c)}</span></td><td><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--blue)">${fmt(e)}</span><div class="ebar"><div class="efill" style="width:${pct}%"></div></div></td><td style="font-size:11px;color:var(--muted)">${date}</td>`;
     tbody.appendChild(tr);
   });
 }
 
-function renderDoughnut(typeCounts) {
-  const labels = Object.keys(typeCounts), values = Object.values(typeCounts);
-  const colors = ['#6a1b9a','#1877F2','#E91E8C','#ff9800','#2e7d32'];
-  const total = values.reduce((a,b) => a+b, 0);
-  if (doughnutInst) doughnutInst.destroy();
-  doughnutInst = new Chart(document.getElementById('doughnutChart'), {
-    type: 'doughnut',
-    data: { labels, datasets: [{ data: values, backgroundColor: colors.slice(0, labels.length), borderWidth: 0, hoverOffset: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '68%' }
+function renderHashtags(){
+  const hashMap={},hashEng={};
+  allPosts.forEach(p=>{
+    const cap=getCaption(p);
+    const tags=(cap.match(/#\w+/g)||[]).map(t=>t.toLowerCase());
+    const eng=getEng(p);
+    tags.forEach(t=>{hashMap[t]=(hashMap[t]||0)+1;hashEng[t]=hashEng[t]||[];hashEng[t].push(eng);});
   });
-  document.getElementById('doughnutLegend').innerHTML = labels.map((l,i) => `<span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:${colors[i]};flex-shrink:0"></span>${l} · ${Math.round(values[i]/total*100)}%</span>`).join('');
+  const sorted=Object.entries(hashMap).sort((a,b)=>b[1]-a[1]);
+  const colors=['#1877F2','#E91E8C','#6a1b9a','#1D9E75','#f57c00','#c62828'];
+  // Cloud
+  const cloud=document.getElementById('hashtagCloud');
+  if(!sorted.length){cloud.innerHTML='<div class="empty-state">Nenhuma hashtag encontrada nas legendas.</div>';return;}
+  cloud.innerHTML='';
+  const maxCount=sorted[0][1];
+  sorted.slice(0,30).forEach(([tag,count],i)=>{
+    const size=11+Math.round((count/maxCount)*10);
+    const color=colors[i%colors.length];
+    const span=document.createElement('span');span.className='htag';
+    span.style.cssText=`font-size:${size}px;background:${color}15;color:${color};border:1px solid ${color}40;`;
+    span.textContent=`${tag} ${count}`;
+    cloud.appendChild(span);
+  });
+  // Eng list
+  const engSorted=Object.entries(hashEng).map(([t,vals])=>([t,Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)])).sort((a,b)=>b[1]-a[1]);
+  const engList=document.getElementById('hashtagEngList');
+  engList.innerHTML='';
+  const maxEng=engSorted[0]?.[1]||1;
+  engSorted.slice(0,10).forEach(([tag,avg],i)=>{
+    const pct=Math.round(avg/maxEng*100);
+    const color=colors[i%colors.length];
+    engList.innerHTML+=`<div class="aud-item"><span class="aud-l" style="font-size:11px;width:90px">${tag}</span><div class="aud-bw"><div class="aud-b" style="width:${pct}%;background:${color}"></div></div><span class="aud-v">${fmt(avg)}</span></div>`;
+  });
+  // Bar chart
+  const top10=engSorted.slice(0,10);
+  if(hashChartInst)hashChartInst.destroy();
+  hashChartInst=new Chart(document.getElementById('hashChart'),{
+    type:'bar',
+    data:{labels:top10.map(([t])=>t),datasets:[{label:'Eng. médio',data:top10.map(([,v])=>v),backgroundColor:top10.map((_,i)=>colors[i%colors.length]+'cc'),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}},y:{ticks:{font:{size:11},color:'#444'},grid:{display:false},border:{display:false}}}}
+  });
 }
 
-async function fetchAudience() {
-  const el = document.getElementById('audienceSection');
-  try {
-    if (ACCOUNT_TYPE !== 'instagram') { el.innerHTML = '<div style="color:var(--muted);font-size:13px">Dados de audiência disponíveis para contas Instagram Business.</div>'; return; }
-    const data = await apiCall(`/v19.0/${ACCOUNT_ID}/insights`, { metric: 'audience_gender_age,audience_city', period: 'lifetime' });
-    let html = '';
-    data.data.forEach(m => {
-      if (m.name === 'audience_gender_age') {
-        const latest = m.values[m.values.length-1].value;
-        const ageGroups = {}, genders = { M: 0, F: 0, U: 0 };
-        let total = 0;
-        Object.entries(latest).forEach(([k,v]) => { const [g,age] = k.split('.'); ageGroups[age] = (ageGroups[age]||0)+v; genders[g] = (genders[g]||0)+v; total += v; });
-        html += '<div class="section-title" style="margin-top:0">Faixa etária</div>';
-        html += Object.entries(ageGroups).sort().map(([age,val]) => { const p = Math.round(val/total*100); return `<div class="aud-item"><span class="aud-label">${age}</span><div class="aud-bar-wrap"><div class="aud-bar" style="width:${p}%;background:#1877F2"></div></div><span class="aud-val">${p}%</span></div>`; }).join('');
-        html += '<div class="section-title">Gênero</div>';
-        const gTotal = genders.M + genders.F + genders.U;
-        const gL = { M:'Masculino', F:'Feminino', U:'Outro' }, gC = { M:'#1877F2', F:'#E91E8C', U:'#888' };
-        html += Object.entries(genders).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).map(([g,v]) => { const p = Math.round(v/gTotal*100); return `<div class="aud-item"><span class="aud-label">${gL[g]}</span><div class="aud-bar-wrap"><div class="aud-bar" style="width:${p}%;background:${gC[g]}"></div></div><span class="aud-val">${p}%</span></div>`; }).join('');
-      }
-      if (m.name === 'audience_city') {
-        const sorted = Object.entries(m.values[m.values.length-1].value).sort((a,b)=>b[1]-a[1]).slice(0,5);
-        const tot = sorted.reduce((s,[,v])=>s+v,0);
-        html += '<div class="section-title">Top cidades</div>';
-        html += sorted.map(([city,v]) => { const p = Math.round(v/tot*100); return `<div class="aud-item"><span class="aud-label" style="width:100px;font-size:11px">${city.split(',')[0]}</span><div class="aud-bar-wrap"><div class="aud-bar" style="width:${p}%;background:#1D9E75"></div></div><span class="aud-val">${p}%</span></div>`; }).join('');
-      }
-    });
-    el.innerHTML = html || '<div style="color:var(--muted);font-size:13px">Sem dados de audiência disponíveis.</div>';
-  } catch(e) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">Dados de audiência indisponíveis (verifique permissões).</div>'; }
+function renderTiming(){
+  const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const dayEng=Array(7).fill(null).map(()=>({sum:0,count:0}));
+  const hourEng=Array(24).fill(null).map(()=>({sum:0,count:0}));
+  const dayCount=Array(7).fill(0);
+  const heatmap=Array(7).fill(null).map(()=>Array(24).fill(null).map(()=>({sum:0,count:0})));
+  allPosts.forEach(p=>{
+    const d=getDate(p),e=getEng(p),dow=d.getDay(),h=d.getHours();
+    dayEng[dow].sum+=e;dayEng[dow].count++;
+    hourEng[h].sum+=e;hourEng[h].count++;
+    dayCount[dow]++;
+    heatmap[dow][h].sum+=e;heatmap[dow][h].count++;
+  });
+  const dayAvg=dayEng.map(d=>d.count?Math.round(d.sum/d.count):0);
+  const hourAvg=hourEng.map(h=>h.count?Math.round(h.sum/h.count):0);
+  const colors7=['#1877F2','#1D9E75','#E91E8C','#f57c00','#6a1b9a','#c62828','#888'];
+  if(dayChartInst)dayChartInst.destroy();
+  dayChartInst=new Chart(document.getElementById('dayChart'),{
+    type:'bar',data:{labels:days,datasets:[{data:dayAvg,backgroundColor:days.map((_,i)=>colors7[i]+'cc'),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999',callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}
+  });
+  const hourLabels=Array.from({length:24},(_,i)=>i+'h');
+  if(hourChartInst)hourChartInst.destroy();
+  hourChartInst=new Chart(document.getElementById('hourChart'),{
+    type:'bar',data:{labels:hourLabels,datasets:[{data:hourAvg,backgroundColor:'rgba(24,119,242,0.7)',borderRadius:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:8},color:'#999',maxTicksLimit:12,autoSkip:true},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999',callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}
+  });
+  if(freqChartInst)freqChartInst.destroy();
+  freqChartInst=new Chart(document.getElementById('freqChart'),{
+    type:'bar',data:{labels:days,datasets:[{data:dayCount,backgroundColor:days.map((_,i)=>colors7[i]+'99'),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false},border:{display:false}},y:{ticks:{font:{size:9},color:'#999'},grid:{color:'rgba(0,0,0,0.04)'},border:{display:false}}}}
+  });
+  // Heatmap
+  const maxHeat=Math.max(...heatmap.flatMap(d=>d.map(h=>h.count?h.sum/h.count:0)));
+  const cont=document.getElementById('heatmapContainer');
+  let html='<div style="display:flex">';
+  html+='<div class="day-labels">';
+  days.forEach(d=>html+=`<div class="day-lbl">${d}</div>`);
+  html+='</div><div style="flex:1">';
+  html+=`<div style="display:grid;grid-template-columns:repeat(24,1fr);gap:2px;margin-bottom:2px">${Array.from({length:24},(_,h)=>`<div style="font-size:8px;color:var(--muted);text-align:center">${h}h</div>`).join('')}</div>`;
+  days.forEach((_,dow)=>{
+    html+=`<div style="display:grid;grid-template-columns:repeat(24,1fr);gap:2px;margin-bottom:2px">`;
+    for(let h=0;h<24;h++){
+      const v=heatmap[dow][h];
+      const avg=v.count?v.sum/v.count:0;
+      const intensity=maxHeat?avg/maxHeat:0;
+      const alpha=Math.round(intensity*0.85*100)/100;
+      html+=`<div style="height:24px;border-radius:3px;background:rgba(24,119,242,${alpha});display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:${intensity>0.5?'#fff':'transparent'}" title="${days[dow]} ${h}h: ${fmt(Math.round(avg))} eng médio"></div>`;
+    }
+    html+='</div>';
+  });
+  html+='</div></div>';
+  cont.innerHTML=html;
 }
 
-async function changePeriod() { setLoading('Atualizando...'); await fetchInsights(); setLoading(null); }
+function renderCalendar(){
+  const postDates={};
+  allPosts.forEach(p=>{
+    const d=getDate(p);
+    const key=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    if(!postDates[key])postDates[key]=[];
+    postDates[key].push(p);
+  });
+  window._postDates=postDates;
+  drawCalendar();
+}
 
-function logout() {
-  TOKEN = ''; PROXY = ''; ACCOUNT_ID = ''; ACCOUNT_TYPE = ''; accountsData = [];
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('topbar').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'none';
-  document.getElementById('tokenInput').value = '';
-  document.getElementById('accountsSection').style.display = 'none';
-  document.getElementById('connectBtn').textContent = 'Conectar minha conta';
-  showStatus(null);
+function drawCalendar(){
+  const months=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('calMonthLabel').textContent=`${months[calMonth]} ${calYear}`;
+  const grid=document.getElementById('calGrid');grid.innerHTML='';
+  const first=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  for(let i=0;i<first;i++){const d=document.createElement('div');d.className='cal-day empty';d.textContent='';grid.appendChild(d);}
+  for(let day=1;day<=daysInMonth;day++){
+    const key=`${calYear}-${calMonth}-${day}`;
+    const posts=window._postDates?.[key]||[];
+    const d=document.createElement('div');
+    d.className='cal-day'+(posts.length?' has-post':'')+(today.getDate()===day&&today.getMonth()===calMonth&&today.getFullYear()===calYear?' today':'');
+    d.textContent=day;
+    if(posts.length){
+      d.title=`${posts.length} post(s)`;
+      d.onclick=()=>showCalPosts(posts,day);
+    }
+    grid.appendChild(d);
+  }
+  document.getElementById('calPostDetail').style.display='none';
+}
+
+function showCalPosts(posts,day){
+  const detail=document.getElementById('calPostDetail');
+  const list=document.getElementById('calPostList');
+  detail.style.display='block';
+  list.innerHTML=posts.map(p=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="ptype ${getType(p)==='VIDEO'||getType(p)==='REEL'?'pt-r':'pt-i'}">${getType(p)}</span><span style="font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(getCaption(p)||'—').substring(0,60)}</span><span style="font-size:12px;font-family:'Space Mono',monospace;color:var(--blue)">♥${fmt(getLikes(p))}</span>${p.permalink?`<a href="${p.permalink}" target="_blank" style="font-size:11px;color:var(--blue)">↗</a>`:''}</div>`).join('');
+}
+
+function calPrev(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}drawCalendar();}
+function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}drawCalendar();}
+
+function renderInsights(){
+  const posts=allPosts;
+  if(!posts.length)return;
+  const followers=window._followers||0;
+  const totalEng=posts.reduce((s,p)=>s+getEng(p),0);
+  const avgEng=posts.length?totalEng/posts.length:0;
+  const engRate=followers?((avgEng/followers)*100):0;
+  // Score consistency: posts por semana
+  if(posts.length>=2){
+    const oldest=getDate(posts[posts.length-1]);
+    const newest=getDate(posts[0]);
+    const weeks=Math.max(1,(newest-oldest)/(7*86400000));
+    const postsPerWeek=posts.length/weeks;
+    const score=Math.min(100,Math.round(postsPerWeek/3*100));
+    drawGauge('scoreChart',score,'#1877F2');
+    document.getElementById('scoreNum').textContent=score;
+    document.getElementById('scoreLabel').textContent=score>=80?'Excelente consistência':score>=50?'Consistência moderada':'Precisa postar mais';
+  }
+  // Eng rate gauge
+  const engRateScore=Math.min(100,Math.round(engRate*10));
+  drawGauge('engRateChart',engRateScore,'#1D9E75');
+  document.getElementById('engRateNum').textContent=engRate.toFixed(2)+'%';
+  document.getElementById('engRateLabel').textContent=engRate>=3?'Taxa excelente':engRate>=1?'Taxa boa':engRate>=0.5?'Taxa média':'Taxa baixa';
+  // Recommendations
+  const days=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const dayEng=Array(7).fill(null).map(()=>({sum:0,count:0}));
+  const hourEng=Array(24).fill(null).map(()=>({sum:0,count:0}));
+  const hashEng={};
+  const typeEng={};
+  posts.forEach(p=>{
+    const d=getDate(p),e=getEng(p),dow=d.getDay(),h=d.getHours();
+    dayEng[dow].sum+=e;dayEng[dow].count++;
+    hourEng[h].sum+=e;hourEng[h].count++;
+    const type=getType(p);typeEng[type]=typeEng[type]||{sum:0,count:0};typeEng[type].sum+=e;typeEng[type].count++;
+    (getCaption(p).match(/#\w+/g)||[]).forEach(t=>{const tl=t.toLowerCase();hashEng[tl]=hashEng[tl]||{sum:0,count:0};hashEng[tl].sum+=e;hashEng[tl].count++;});
+  });
+  const bestDay=dayEng.reduce((b,d,i)=>d.count&&d.sum/d.count>(b.v||0)?{i,v:d.sum/d.count}:b,{});
+  const bestHour=hourEng.reduce((b,h,i)=>h.count&&h.sum/h.count>(b.v||0)?{i,v:h.sum/h.count}:b,{});
+  const bestType=Object.entries(typeEng).sort((a,b)=>b[1].sum/b[1].count-a[1].sum/a[1].count)[0];
+  const bestHash=Object.entries(hashEng).sort((a,b)=>b[1].sum/b[1].count-a[1].sum/a[1].count)[0];
+  const insights=[];
+  if(bestDay.i!==undefined)insights.push({icon:'📅',color:'#e3f0fd',text:`Poste às <strong>${days[bestDay.i]}s</strong> — é o dia com maior engajamento médio (${fmt(Math.round(bestDay.v))} interações por post).`});
+  if(bestHour.i!==undefined)insights.push({icon:'⏰',color:'#e1f5ee',text:`O melhor horário é por volta das <strong>${bestHour.i}h</strong>, quando seus posts recebem mais curtidas e comentários.`});
+  if(bestType)insights.push({icon:'🎬',color:'#f3e5f5',text:`Conteúdo do tipo <strong>${bestType[0]}</strong> performa melhor na sua conta. Priorize esse formato.`});
+  if(bestHash)insights.push({icon:'#️⃣',color:'#fff3e0',text:`A hashtag <strong>${bestHash[0]}</strong> gera mais engajamento em média. Use-a com frequência.`});
+  if(engRate<1)insights.push({icon:'📈',color:'#ffebee',text:`Sua taxa de engajamento está em ${engRate.toFixed(2)}%. Experimente fazer mais perguntas nas legendas e responder comentários.`});
+  const list=document.getElementById('insightsList');
+  list.innerHTML=insights.map(ins=>`<div class="insight-item"><div class="insight-icon" style="background:${ins.color}">${ins.icon}</div><div class="insight-text">${ins.text}</div></div>`).join('')||'<div class="empty-state">Sem dados suficientes para gerar insights.</div>';
+}
+
+function drawGauge(id,score,color){
+  const canvas=document.getElementById(id);
+  const ctx=canvas.getContext('2d');
+  const cx=45,cy=45,r=35,start=Math.PI*0.75,end=Math.PI*0.25;
+  ctx.clearRect(0,0,90,90);
+  ctx.beginPath();ctx.arc(cx,cy,r,start,end+Math.PI*2);ctx.strokeStyle='#f0f0ec';ctx.lineWidth=8;ctx.lineCap='round';ctx.stroke();
+  const progress=start+(end+Math.PI*2-start)*(score/100);
+  ctx.beginPath();ctx.arc(cx,cy,r,start,progress);ctx.strokeStyle=color;ctx.lineWidth=8;ctx.lineCap='round';ctx.stroke();
+}
+
+async function onPeriodChange(){renderOverview();}
+
+function logout(){
+  TOKEN='';PROXY='';ACCOUNT_ID='';allPosts=[];accountsData=[];
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('topbar').style.display='none';
+  document.getElementById('tabs').style.display='none';
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('tokenInput').value='';
+  document.getElementById('accsSection').style.display='none';
+  document.getElementById('connBtn').textContent='Conectar minha conta';
+  showSt(null);
 }
 </script>
 </body>
